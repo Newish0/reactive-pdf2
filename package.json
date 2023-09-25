@@ -10,11 +10,26 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.0.8",
+    "@dnd-kit/sortable": "^7.0.2",
+    "@tailwindcss/typography": "^0.5.9",
+    "daisyui": "^3.6.1",
+    "jotai": "^2.4.0",
+    "lodash": "^4.17.21",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^3.9.179",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-beautiful-dnd": "^13.1.1",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.10.1",
+    "react-router-dom": "^6.15.0",
+    "tailwind-merge": "^1.14.0",
+    "theme-change": "^2.5.0"
   },
   "devDependencies": {
+    "@types/node": "^20.5.6",
     "@types/react": "^18.2.15",
+    "@types/react-beautiful-dnd": "^13.1.4",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
