@@ -22,10 +22,16 @@ interface DNDItem {
 
 interface GridDNDBoxProps {
     items: DNDItem[];
+    start?: React.ReactNode;
+    end?: React.ReactNode;
 }
 
 // Define the main component that includes the DND context and the sortable context
-const GridDNDBox = ({ items: providedItems }: GridDNDBoxProps) => {
+const GridDNDBox = ({
+    items: providedItems,
+    start: startElement,
+    end: endElement,
+}: GridDNDBoxProps) => {
     const [items, setItems] = useState(providedItems);
     const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -66,11 +72,15 @@ const GridDNDBox = ({ items: providedItems }: GridDNDBoxProps) => {
         >
             <SortableContext items={items} strategy={rectSortingStrategy}>
                 <GridContainer>
+                    {startElement}
+
                     {items.map((item) => (
                         <GridItem key={item.id} id={item.id}>
                             {item.content}
                         </GridItem>
                     ))}
+
+                    {endElement}
                 </GridContainer>
             </SortableContext>
 

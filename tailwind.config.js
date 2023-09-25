@@ -5,10 +5,12 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+
+    },
   },
   // eslint-disable-next-line no-undef
-  plugins: [require('@tailwindcss/typography'), require("daisyui")],
+  plugins: [require('@tailwindcss/typography'), require("daisyui"), moreAspectRatios],
 
   daisyui: {
     themes: ["light", "dark", "emerald", "night", "business", "cyberpunk"],
@@ -20,5 +22,23 @@ export default {
     prefix: "", // prefix for daisyUI classnames (components, modifiers and responsive class names. Not colors)
     logs: true, // Shows info about daisyUI version and used config in the console when building your CSS
   },
+}
+
+
+
+
+
+function moreAspectRatios({ addUtilities }) {
+  const newUtilities = {}
+  const ratios = ['1/1', '4/3', '3/2', '16/9', '85/110']
+
+  ratios.forEach(ratio => {
+    const [w, h] = ratio.split('/')
+    newUtilities[`.aspect-${w}-${h}`] = {
+      aspectRatio: ratio.replace("-", ".")
+    }
+  })
+
+  addUtilities(newUtilities, ['responsive', 'hover'])
 }
 
