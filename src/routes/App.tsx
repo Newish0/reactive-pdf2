@@ -1,7 +1,33 @@
 import GridDNDBox from "@components/GridDNDBox";
 import PseudoPageInput from "@components/PseudoPageInput";
+import BetterPDF, { ProxyPage } from "@util/BetterPDF";
+import { useState } from "react";
 
 export default function App() {
+    const [pages, setPages] = useState<ProxyPage[]>([]);
+
+    const handleAddFiles = async (files: FileList | null) => {
+        if (!files) return;
+
+        for (const f of files) {
+            const bPdf = await BetterPDF.open(f);
+            setPages([...pages, ...(await bPdf.toProxyPages())]);
+        }
+    };
+
+    const proxyPageToDNDItem = (page: ProxyPage) => {
+        return {
+            id: `${page.reference.hash}-${page.reference.page}`,
+            title: `${page.reference.file.name} ⋅ ${page.reference.page}`,
+            content: (
+                <img
+                    className="object-contain border border-neutral rounded-md"
+                    src={page.thumbnail ?? ""}
+                />
+            ),
+        };
+    };
+
     return (
         <section className="px-6 py-8">
             <div className="">
@@ -11,59 +37,14 @@ export default function App() {
 
                 <div className="rounded p-4 bg-base-200">
                     <GridDNDBox
-                        items={[
-                            {
-                                id: "1",
-                                content: (
-                                    <img
-                                        className="m-auto w-32 aspect-auto h-full object-cover"
-                                        src={`https://picsum.photos/seed/${crypto.randomUUID()}/200/300`}
-                                    />
-                                ),
-                            },
-                            {
-                                id: "2",
-                                content: (
-                                    <img
-                                        className="m-auto w-32 aspect-auto h-full object-cover"
-                                        src={`https://picsum.photos/seed/${crypto.randomUUID()}/200/300`}
-                                    />
-                                ),
-                            },
-                            {
-                                id: "3",
-                                content: (
-                                    <img
-                                        className="m-auto w-32 aspect-auto h-full object-cover"
-                                        src={`https://picsum.photos/seed/${crypto.randomUUID()}/200/300`}
-                                    />
-                                ),
-                            },
-                            {
-                                id: "4",
-                                content: (
-                                    <img
-                                        className="m-auto w-32 aspect-auto h-full object-cover"
-                                        src={`https://picsum.photos/seed/${crypto.randomUUID()}/200/300`}
-                                    />
-                                ),
-                            },
-                            {
-                                id: "5",
-                                content: (
-                                    <img
-                                        className="m-auto w-32 aspect-auto h-full object-cover"
-                                        src={`https://picsum.photos/seed/${crypto.randomUUID()}/200/300`}
-                                    />
-                                ),
-                            },
-                        ]}
+                        spacing={24}
+                        showFullTitle={true}
+                        items={pages.map((p) => proxyPageToDNDItem(p))}
                         end={
-                            <div className="p-4 m-auto">
+                            <div className="p-4 m-auto w-32">
                                 <PseudoPageInput
-                                    onChange={function (files: FileList | null): void {
-                                        console.log(files);
-                                    }}
+                                    onChange={handleAddFiles}
+                                    accept="application/pdf"
                                 ></PseudoPageInput>
                             </div>
                         }

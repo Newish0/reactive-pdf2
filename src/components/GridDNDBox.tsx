@@ -10,7 +10,7 @@ import {
     useSensors,
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GridContainer from "./GridContainer";
 import GridItem from "./GridItem";
 import { Badge, Indicator, Stack } from "react-daisyui";
@@ -19,6 +19,7 @@ import { twMerge } from "tailwind-merge";
 interface DNDItem {
     id: string;
     content: React.ReactNode;
+    title?: string;
     [key: string]: unknown;
 }
 
@@ -27,6 +28,8 @@ interface GridDNDBoxProps {
     start?: React.ReactNode;
     end?: React.ReactNode;
     allowSelection?: boolean;
+    spacing: number;
+    showFullTitle: boolean;
 }
 
 // Define the main component that includes the DND context and the sortable context
@@ -35,10 +38,16 @@ const GridDNDBox = ({
     start: startElement,
     end: endElement,
     allowSelection,
+    spacing,
+    showFullTitle,
 }: GridDNDBoxProps) => {
     const [items, setItems] = useState(providedItems);
     const [activeId, setActiveId] = useState<string | null>(null);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+    useEffect(() => {
+        setItems(providedItems);
+    }, [providedItems]);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -114,7 +123,7 @@ const GridDNDBox = ({
             onDragStart={handleDragStart}
         >
             <SortableContext items={items} strategy={rectSortingStrategy}>
-                <GridContainer>
+                <GridContainer spacing={spacing}>
                     {startElement}
 
                     {items.map((item) => (
@@ -124,14 +133,26 @@ const GridDNDBox = ({
                             selectable={allowSelection}
                             onSelectionChange={handleSelection}
                         >
-                            {item.content}
+                            <div className="">
+                                {item.content}
+
+                                <div
+                                    className={twMerge(
+                                        "w-40 m-auto text-center",
+                                        showFullTitle
+                                            ? ""
+                                            : "whitespace-nowrap overflow-ellipsis overflow-hidden"
+                                    )}
+                                >
+                                    {item.title}
+                                </div>
+                            </div>
                         </GridItem>
                     ))}
                     {endElement}
                 </GridContainer>
             </SortableContext>
 
-            {/* TODO: When selecting multiple, this shall be a stack of all items with # indicator */}
             <DragOverlay adjustScale={true}>
                 {selectedIds.length > 1 ? (
                     <Indicator>
@@ -154,10 +175,13 @@ const GridDNDBox = ({
                     items.find((item) => item.id === activeId)?.content
                 )}
             </DragOverlay>
-
-            {selectedIds.join(", ")}
         </DndContext>
     );
+};
+
+GridDNDBox.defaultProps = {
+    spacing: 8,
+    showFullTitle: false,
 };
 
 export default GridDNDBox;
