@@ -13,7 +13,7 @@ import { SortableContext, arrayMove, rectSortingStrategy } from "@dnd-kit/sortab
 import { useEffect, useState } from "react";
 import GridContainer from "./GridContainer";
 import GridItem from "./GridItem";
-import { Badge, Indicator, Stack } from "react-daisyui";
+import { Badge, Indicator, Stack, Tooltip } from "react-daisyui";
 import { twMerge } from "tailwind-merge";
 
 interface DNDItem {
@@ -133,19 +133,24 @@ const GridDNDBox = ({
                             selectable={allowSelection}
                             onSelectionChange={handleSelection}
                         >
-                            <div className="">
+                            <div>
                                 {item.content}
 
-                                <div
-                                    className={twMerge(
-                                        "w-40 m-auto text-center",
-                                        showFullTitle
-                                            ? ""
-                                            : "whitespace-nowrap overflow-ellipsis overflow-hidden"
-                                    )}
-                                >
-                                    {item.title}
-                                </div>
+                                {showFullTitle ? (
+                                    <div className="w-40 m-auto text-center">{item.title}</div>
+                                ) : (
+                                    <div className="flex justify-center">
+                                        <Tooltip
+                                            message={item.title ?? ""}
+                                            position="bottom"
+                                            className="z-10"
+                                        >
+                                            <div className="w-40 text-center whitespace-nowrap overflow-ellipsis overflow-hidden">
+                                                {item.title}
+                                            </div>
+                                        </Tooltip>
+                                    </div>
+                                )}
                             </div>
                         </GridItem>
                     ))}

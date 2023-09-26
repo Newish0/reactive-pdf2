@@ -35,10 +35,10 @@ export default function App() {
                     <h1>Reactive PDF</h1>
                 </div>
 
-                <div className="rounded p-4 bg-base-200">
+                <div className="rounded-box p-8 my-4 bg-base-200">
                     <GridDNDBox
                         spacing={24}
-                        showFullTitle={true}
+                        showFullTitle={false}
                         items={pages.map((p) => proxyPageToDNDItem(p))}
                         end={
                             <div className="p-4 m-auto w-32">
