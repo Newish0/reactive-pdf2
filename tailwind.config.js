@@ -1,6 +1,8 @@
-/** @type {import('tailwindcss').Config} */
+/** @type {import("tailwindcss").Config} */
 export default {
   content: [
+    "node_modules/daisyui/dist/**/*.js",
+    "node_modules/react-daisyui/dist/**/*.js",
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
@@ -10,7 +12,7 @@ export default {
     },
   },
   // eslint-disable-next-line no-undef
-  plugins: [require('@tailwindcss/typography'), require("daisyui"), moreAspectRatios],
+  plugins: [require("@tailwindcss/typography"), require("daisyui"), moreAspectRatios],
 
   daisyui: {
     themes: ["light", "dark", "emerald", "night", "business", "cyberpunk"],
@@ -30,15 +32,15 @@ export default {
 
 function moreAspectRatios({ addUtilities }) {
   const newUtilities = {}
-  const ratios = ['1/1', '4/3', '3/2', '16/9', '85/110']
+  const ratios = ["1/1", "4/3", "3/2", "16/9", "85/110"]
 
   ratios.forEach(ratio => {
-    const [w, h] = ratio.split('/')
+    const [w, h] = ratio.split("/")
     newUtilities[`.aspect-${w}-${h}`] = {
       aspectRatio: ratio.replace("-", ".")
     }
   })
 
-  addUtilities(newUtilities, ['responsive', 'hover'])
+  addUtilities(newUtilities, ["responsive", "hover"])
 }
 

@@ -16,7 +16,7 @@ export default function App() {
                                 id: "1",
                                 content: (
                                     <img
-                                        className="p-2 m-auto w-32 aspect-auto h-full object-contain"
+                                        className="m-auto w-32 aspect-auto h-full object-cover"
                                         src={`https://picsum.photos/seed/${crypto.randomUUID()}/200/300`}
                                     />
                                 ),
@@ -25,7 +25,7 @@ export default function App() {
                                 id: "2",
                                 content: (
                                     <img
-                                        className="p-2 m-auto w-32 aspect-auto h-full object-contain"
+                                        className="m-auto w-32 aspect-auto h-full object-cover"
                                         src={`https://picsum.photos/seed/${crypto.randomUUID()}/200/300`}
                                     />
                                 ),
@@ -34,7 +34,7 @@ export default function App() {
                                 id: "3",
                                 content: (
                                     <img
-                                        className="p-2 m-auto w-32 aspect-auto h-full object-contain"
+                                        className="m-auto w-32 aspect-auto h-full object-cover"
                                         src={`https://picsum.photos/seed/${crypto.randomUUID()}/200/300`}
                                     />
                                 ),
@@ -43,7 +43,7 @@ export default function App() {
                                 id: "4",
                                 content: (
                                     <img
-                                        className="p-2 m-auto w-32 aspect-auto h-full object-contain"
+                                        className="m-auto w-32 aspect-auto h-full object-cover"
                                         src={`https://picsum.photos/seed/${crypto.randomUUID()}/200/300`}
                                     />
                                 ),
@@ -52,7 +52,7 @@ export default function App() {
                                 id: "5",
                                 content: (
                                     <img
-                                        className="p-2 m-auto w-32 aspect-auto h-full object-contain"
+                                        className="m-auto w-32 aspect-auto h-full object-cover"
                                         src={`https://picsum.photos/seed/${crypto.randomUUID()}/200/300`}
                                     />
                                 ),
@@ -67,6 +67,7 @@ export default function App() {
                                 ></PseudoPageInput>
                             </div>
                         }
+                        allowSelection={true}
                     ></GridDNDBox>
                 </div>
             </div>
