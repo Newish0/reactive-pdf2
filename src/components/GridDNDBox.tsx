@@ -45,18 +45,34 @@ const GridDNDBox = ({
 
         if (active && over && active.id !== over.id) {
             setItems((items) => {
+                const tmpOldIndex = items.findIndex((item) => item.id === active.id);
                 const newIndex = items.findIndex((item) => item.id === over.id);
 
-                // Move all selected elements to immediately after active 
-                for (const selectedId of selectedIds) {
-                    const selectedIndex = items.findIndex((item) => item.id === selectedId);
-                    items = arrayMove(items, selectedIndex, newIndex);
+                const isMoveRight = newIndex > tmpOldIndex;
+
+                const moveActive = () => {
+                    // move active
+                    const oldIndex = items.findIndex((item) => item.id === active.id);
+                    items = arrayMove(items, oldIndex, newIndex);
+                };
+
+                const moveSelected = () => {
+                    // Move all selected elements to immediately after active
+                    for (const selectedId of selectedIds) {
+                        const selectedIndex = items.findIndex((item) => item.id === selectedId);
+                        items = arrayMove(items, selectedIndex, newIndex);
+                    }
+                };
+
+                if (isMoveRight) {
+                    moveActive();
+                    moveSelected();
+                } else {
+                    moveSelected();
+                    moveActive();
                 }
 
-                // Finally move active
-                const oldIndex = items.findIndex((item) => item.id === active.id);
-
-                return arrayMove(items, oldIndex, newIndex);
+                return items;
             });
         }
 
@@ -138,7 +154,6 @@ const GridDNDBox = ({
                     items.find((item) => item.id === activeId)?.content
                 )}
             </DragOverlay>
-
 
             {selectedIds.join(", ")}
         </DndContext>
