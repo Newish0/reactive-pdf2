@@ -1,13 +1,14 @@
 interface GridContainerProps extends React.PropsWithChildren {
     spacing: number;
+    gridSize: number;
 }
 
-export default function GridContainer({ children, spacing }: GridContainerProps) {
+export default function GridContainer({ children, spacing, gridSize }: GridContainerProps) {
     return (
         <div
             style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                gridTemplateColumns: `repeat(auto-fill, minmax(${gridSize}px, 1fr))`,
                 gap: `${spacing}px`,
             }}
         >
@@ -18,4 +19,5 @@ export default function GridContainer({ children, spacing }: GridContainerProps)
 
 GridContainer.defaultProps = {
     spacing: 8,
+    gridSize: 160,
 };

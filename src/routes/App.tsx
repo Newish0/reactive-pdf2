@@ -38,10 +38,11 @@ export default function App() {
                 <div className="rounded-box p-8 my-4 bg-base-200">
                     <GridDNDBox
                         spacing={24}
+                        gridSize={160}
                         showFullTitle={false}
                         items={pages.map((p) => proxyPageToDNDItem(p))}
                         end={
-                            <div className="p-4 m-auto w-32">
+                            <div className="p-4 m-auto h-full">
                                 <PseudoPageInput
                                     onChange={handleAddFiles}
                                     accept="application/pdf"

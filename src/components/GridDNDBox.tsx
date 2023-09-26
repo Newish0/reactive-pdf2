@@ -30,6 +30,7 @@ interface GridDNDBoxProps {
     allowSelection?: boolean;
     spacing: number;
     showFullTitle: boolean;
+    gridSize: number;
 }
 
 // Define the main component that includes the DND context and the sortable context
@@ -40,6 +41,7 @@ const GridDNDBox = ({
     allowSelection,
     spacing,
     showFullTitle,
+    gridSize,
 }: GridDNDBoxProps) => {
     const [items, setItems] = useState(providedItems);
     const [activeId, setActiveId] = useState<string | null>(null);
@@ -123,7 +125,7 @@ const GridDNDBox = ({
             onDragStart={handleDragStart}
         >
             <SortableContext items={items} strategy={rectSortingStrategy}>
-                <GridContainer spacing={spacing}>
+                <GridContainer spacing={spacing} gridSize={gridSize}>
                     {startElement}
 
                     {items.map((item) => (
@@ -133,11 +135,16 @@ const GridDNDBox = ({
                             selectable={allowSelection}
                             onSelectionChange={handleSelection}
                         >
-                            <div>
+                            <div className="flex flex-col align-middle">
                                 {item.content}
 
                                 {showFullTitle ? (
-                                    <div className="w-40 m-auto text-center">{item.title}</div>
+                                    <div
+                                        style={{ width: `${gridSize}px` }}
+                                        className="m-auto text-center"
+                                    >
+                                        {item.title}
+                                    </div>
                                 ) : (
                                     <div className="flex justify-center">
                                         <Tooltip
@@ -145,7 +152,10 @@ const GridDNDBox = ({
                                             position="bottom"
                                             className="z-10"
                                         >
-                                            <div className="w-40 text-center whitespace-nowrap overflow-ellipsis overflow-hidden">
+                                            <div
+                                                style={{ width: `${gridSize}px` }}
+                                                className="text-center whitespace-nowrap overflow-ellipsis overflow-hidden"
+                                            >
                                                 {item.title}
                                             </div>
                                         </Tooltip>
@@ -186,6 +196,7 @@ const GridDNDBox = ({
 
 GridDNDBox.defaultProps = {
     spacing: 8,
+    gridSize: 160,
     showFullTitle: false,
 };
 
