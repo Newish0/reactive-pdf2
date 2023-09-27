@@ -16,7 +16,7 @@ import GridItem from "./GridItem";
 import { Badge, Indicator, Stack, Tooltip } from "react-daisyui";
 import { twMerge } from "tailwind-merge";
 
-interface DNDItem {
+export interface DNDItem {
     id: string;
     content: React.ReactNode;
     title?: string;
@@ -31,6 +31,7 @@ interface GridDNDBoxProps {
     spacing: number;
     showFullTitle: boolean;
     gridSize: number;
+    onMove?: (oldIndex: number, newIndex: number) => void;
 }
 
 // Define the main component that includes the DND context and the sortable context
@@ -42,6 +43,7 @@ const GridDNDBox = ({
     spacing,
     showFullTitle,
     gridSize,
+    onMove: propagateMove,
 }: GridDNDBoxProps) => {
     const [items, setItems] = useState(providedItems);
     const [activeId, setActiveId] = useState<string | null>(null);
@@ -50,6 +52,11 @@ const GridDNDBox = ({
     useEffect(() => {
         setItems(providedItems);
     }, [providedItems]);
+
+    // Clear selections on "allowSelection" change
+    useEffect(() => {
+        setSelectedIds([]);
+    }, [allowSelection]);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -65,6 +72,7 @@ const GridDNDBox = ({
                     // move active
                     const oldIndex = items.findIndex((item) => item.id === active.id);
                     items = arrayMove(items, oldIndex, newIndex);
+                    if (propagateMove) propagateMove(oldIndex, newIndex);
                 };
 
                 const moveSelected = () => {
@@ -72,6 +80,7 @@ const GridDNDBox = ({
                     for (const selectedId of selectedIds) {
                         const selectedIndex = items.findIndex((item) => item.id === selectedId);
                         items = arrayMove(items, selectedIndex, newIndex);
+                        if (propagateMove) propagateMove(selectedIndex, newIndex);
                     }
                 };
 
@@ -179,7 +188,7 @@ const GridDNDBox = ({
                         </Badge>
 
                         {/* Active item always on top */}
-                        <Stack>
+                        <Stack style={{ width: `${gridSize}px` }}>
                             {items.find((item) => item.id === activeId)?.content}
                             {...items
                                 .filter(({ id }) => selectedIds.includes(id) && id !== activeId)

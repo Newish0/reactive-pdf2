@@ -255,6 +255,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 export interface ProxyPage {
     thumbnail: string | null;
+    reRenderThumbnail: (scale: number) => Promise<void>;
     reference: {
         hash: string;
         file: File;
@@ -280,7 +281,7 @@ export default class BetterPDF {
         this.hash = "";
     }
 
-    public async toProxyPages() {
+    public async toProxyPages(scale = 0.25) {
         if (!this.pdfJsDoc) throw new PDFNotReadyError();
 
         const n = this.pdfJsDoc.numPages;
@@ -290,16 +291,20 @@ export default class BetterPDF {
         for (let i = 1; i <= n; i++) {
             const page = await this.pdfJsDoc.getPage(i);
 
-            const thumbnail = await BetterPDF.renderPage(page, { scale: 0.25 });
+            const thumbnail = await BetterPDF.renderPage(page, { scale });
 
-            proxyPages.push({
+            const proxyPage = {
                 thumbnail,
+                async reRenderThumbnail(scale = 0.25) {
+                    proxyPage.thumbnail = await BetterPDF.renderPage(page, { scale });
+                },
                 reference: {
                     file: this.file,
                     hash: this.hash,
                     page: i,
                 },
-            });
+            };
+            proxyPages.push(proxyPage);
         }
 
         return proxyPages;
