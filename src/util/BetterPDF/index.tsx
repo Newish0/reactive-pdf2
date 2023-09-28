@@ -281,7 +281,10 @@ export default class BetterPDF {
         this.hash = "";
     }
 
-    public async toProxyPages(scale = 0.25) {
+    public async toProxyPages(
+        scale = 0.25,
+        progressCallback?: (newPage: ProxyPage, current: number, total: number) => void
+    ) {
         if (!this.pdfJsDoc) throw new PDFNotReadyError();
 
         const n = this.pdfJsDoc.numPages;
@@ -305,6 +308,8 @@ export default class BetterPDF {
                 },
             };
             proxyPages.push(proxyPage);
+
+            if (progressCallback) progressCallback(proxyPage, i, n);
         }
 
         return proxyPages;

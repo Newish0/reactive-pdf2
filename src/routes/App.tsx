@@ -9,7 +9,9 @@ import { TbZoomIn, TbZoomOut } from "react-icons/tb";
 
 const MIN_SCALE = 100;
 const MAX_SCALE = 600;
-const STEP_SIZE = 10;
+
+// TODO: User settings
+const preferAnimation = true;
 
 export default function App() {
     const [gridScale, setGridScale] = useState(160);
@@ -22,7 +24,16 @@ export default function App() {
 
         for (const f of files) {
             const bPdf = await BetterPDF.open(f);
-            setPages([...pages, ...(await bPdf.toProxyPages(0.75))]);
+            if (preferAnimation) {
+                setPages([
+                    ...pages,
+                    ...(await bPdf.toProxyPages(0.75, (curPage) =>
+                        setPages((pages) => [...pages, curPage])
+                    )),
+                ]);
+            } else {
+                setPages([...pages, ...(await bPdf.toProxyPages(0.75))]);
+            }
         }
     };
 
