@@ -13,7 +13,7 @@ export default function PseudoPageInput({ onChange, type, accept }: PseudoPageIn
 
     if (type === "Letter") {
         return (
-            <div className="group border-2 border-dashed border-primary aspect-85-110 w-full h-full flex justify-center items-center hover:border-primary-focus hover:scale-105 transition-all ">
+            <div className="relative group border-2 border-dashed border-primary aspect-85-110 w-full h-full flex justify-center items-center hover:border-primary-focus hover:scale-105 transition-all ">
                 <input
                     className="w-full h-full opacity-0 cursor-pointer"
                     type="file"

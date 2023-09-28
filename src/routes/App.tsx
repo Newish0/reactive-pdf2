@@ -4,7 +4,7 @@ import { arrayMove } from "@dnd-kit/sortable";
 import BetterPDF, { ProxyPage } from "@util/BetterPDF";
 import { useState } from "react";
 
-import { Button, Divider, Range } from "react-daisyui";
+import { Button, Divider, Input, Join, Range } from "react-daisyui";
 import { TbZoomIn, TbZoomOut } from "react-icons/tb";
 
 const MIN_SCALE = 100;
@@ -90,8 +90,8 @@ export default function App() {
     };
 
     return (
-        <section className="px-6 py-8 h-screen">
-            <div className="flex flex-col h-full">
+        <section className="px-6 py-8 h-screen ">
+            <div className="flex flex-col space-y-4 h-full">
                 <div className="prose prose-sm md:prose-base">
                     <h1>Reactive PDF</h1>
                 </div>
@@ -100,7 +100,7 @@ export default function App() {
 
                 <Controls />
 
-                <div className="rounded-box p-8 my-4 bg-base-200 overflow-y-auto">
+                <div className="rounded-box p-8 bg-base-200 flex-shrink h-full overflow-x-hidden overflow-y-auto scrollbar">
                     <GridDNDBox
                         spacing={24}
                         gridSize={gridScale}
@@ -117,6 +117,20 @@ export default function App() {
                             </div>
                         }
                     ></GridDNDBox>
+                </div>
+
+                <div className="rounded-box p-8 bg-base-200">
+                    <Join className="w-full">
+                        <Input
+                            className="join-item w-full"
+                            type="text"
+                            color="neutral"
+                            placeholder="export.pdf"
+                        />
+                        <Button color="primary" className="join-item">
+                            Export
+                        </Button>
+                    </Join>
                 </div>
             </div>
         </section>
