@@ -1,8 +1,9 @@
-import GridDNDBox, { DNDItem } from "@components/GridDNDBox";
+import GridDNDBox, { DNDItem } from "@components/dndgrid/GridDNDBox";
 import PseudoPageInput from "@components/PseudoPageInput";
+import GridDNDContext from "@components/dndgrid/GridDNDContext";
 import { arrayMove } from "@dnd-kit/sortable";
 import BetterPDF, { ProxyPage } from "@util/BetterPDF";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button, Divider, Input, Join, Range } from "react-daisyui";
 import { TbZoomIn, TbZoomOut } from "react-icons/tb";
@@ -17,7 +18,13 @@ export default function App() {
     const [gridScale, setGridScale] = useState(160);
     const [pages, setPages] = useState<ProxyPage[]>([]);
 
+    const [items, setItems] = useState<DNDItem[]>([]);
+
     const [selectActive, setSelectActive] = useState(false);
+
+    useEffect(() => {
+        setItems(pages.map((p) => proxyPageToDNDItem(p)));
+    }, [pages]);
 
     const handleAddFiles = async (files: FileList | null) => {
         if (!files) return;
@@ -53,10 +60,6 @@ export default function App() {
     const handleScaleChange = async (evt: React.ChangeEvent<HTMLInputElement>) => {
         const newScale = parseInt(evt.target.value);
         setGridScale(newScale);
-    };
-
-    const handleDNDItemsChange = (oldIndex: number, newIndex: number) => {
-        setPages((pages) => arrayMove(pages, oldIndex, newIndex));
     };
 
     const Controls = () => {
@@ -101,22 +104,22 @@ export default function App() {
                 <Controls />
 
                 <div className="rounded-box p-8 bg-base-200 flex-shrink h-full overflow-x-hidden overflow-y-auto scrollbar">
-                    <GridDNDBox
-                        spacing={24}
-                        gridSize={gridScale}
-                        showFullTitle={false}
-                        allowSelection={selectActive}
-                        items={pages.map((p) => proxyPageToDNDItem(p))}
-                        onMove={handleDNDItemsChange}
-                        end={
-                            <div className="p-4 m-auto h-full">
-                                <PseudoPageInput
-                                    onChange={handleAddFiles}
-                                    accept="application/pdf"
-                                ></PseudoPageInput>
-                            </div>
-                        }
-                    ></GridDNDBox>
+                    <GridDNDContext.Provider value={[items, setItems]}>
+                        <GridDNDBox
+                            spacing={24}
+                            gridSize={gridScale}
+                            showFullTitle={false}
+                            allowSelection={selectActive}
+                            end={
+                                <div className="p-4 m-auto h-full">
+                                    <PseudoPageInput
+                                        onChange={handleAddFiles}
+                                        accept="application/pdf"
+                                    ></PseudoPageInput>
+                                </div>
+                            }
+                        ></GridDNDBox>
+                    </GridDNDContext.Provider>
                 </div>
 
                 <div className="rounded-box p-8 bg-base-200">

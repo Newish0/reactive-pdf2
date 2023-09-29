@@ -10,11 +10,12 @@ import {
     useSensors,
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import GridContainer from "./GridContainer";
 import GridItem from "./GridItem";
 import { Badge, Indicator, Stack, Tooltip } from "react-daisyui";
 import { twMerge } from "tailwind-merge";
+import GridDNDContext from "./GridDNDContext";
 
 export interface DNDItem {
     id: string;
@@ -24,34 +25,26 @@ export interface DNDItem {
 }
 
 interface GridDNDBoxProps {
-    items: DNDItem[];
     start?: React.ReactNode;
     end?: React.ReactNode;
     allowSelection?: boolean;
     spacing: number;
     showFullTitle: boolean;
     gridSize: number;
-    onMove?: (oldIndex: number, newIndex: number) => void;
 }
 
 // Define the main component that includes the DND context and the sortable context
 const GridDNDBox = ({
-    items: providedItems,
     start: startElement,
     end: endElement,
     allowSelection,
     spacing,
     showFullTitle,
     gridSize,
-    onMove: propagateMove,
 }: GridDNDBoxProps) => {
-    const [items, setItems] = useState(providedItems);
+    const [items, setItems] = useContext(GridDNDContext);
     const [activeId, setActiveId] = useState<string | null>(null);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
-    useEffect(() => {
-        setItems(providedItems);
-    }, [providedItems]);
 
     // Clear selections on "allowSelection" change
     useEffect(() => {
@@ -72,7 +65,6 @@ const GridDNDBox = ({
                     // move active
                     const oldIndex = items.findIndex((item) => item.id === active.id);
                     items = arrayMove(items, oldIndex, newIndex);
-                    if (propagateMove) propagateMove(oldIndex, newIndex);
                 };
 
                 const moveSelected = () => {
@@ -80,7 +72,6 @@ const GridDNDBox = ({
                     for (const selectedId of selectedIds) {
                         const selectedIndex = items.findIndex((item) => item.id === selectedId);
                         items = arrayMove(items, selectedIndex, newIndex);
-                        if (propagateMove) propagateMove(selectedIndex, newIndex);
                     }
                 };
 
