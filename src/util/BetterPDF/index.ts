@@ -251,7 +251,7 @@ import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.js?url";
 import { hashArrayBuffer } from "@util/hash";
 import { PDFNotReadyError } from "./errors";
 import { PDFDocument } from "pdf-lib";
-import { copyArrayBuffer, readFileAsArrayBuffer } from "@util/io";
+import { copyArrayBuffer } from "@util/io";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -382,23 +382,14 @@ export default class BetterPDF {
     public static async pagesToPDF(...pages: ProxyPage[]): Promise<PDFDocument> {
         const pdfDoc = await PDFDocument.create();
 
-        const bPdfMap = new Map<BetterPDF, ProxyPage[]>();
+        for (const page of pages) {
+            const { betterPdf, page: pageNum } = page.reference;
 
-        for (const p of pages) {
-            const pageArr = bPdfMap.get(p.reference.betterPdf);
-            if (pageArr) pageArr.push(p);
-            else bPdfMap.set(p.reference.betterPdf, [p]);
-        }
+            if (!betterPdf.pdfLibDoc) throw new PDFNotReadyError();
 
-        for (const [bPdf, pages] of bPdfMap.entries()) {
-            if (!bPdf.pdfLibDoc) throw new PDFNotReadyError();
+            const pdfPages = await pdfDoc.copyPages(betterPdf.pdfLibDoc, [pageNum - 1]);
 
-            const pdfPages = await pdfDoc.copyPages(
-                bPdf.pdfLibDoc,
-                pages.map((p) => p.reference.page - 1)
-            );
-
-            for (const p of pdfPages) pdfDoc.addPage(p);
+            for (const pdfPage of pdfPages) pdfDoc.addPage(pdfPage);
         }
 
         return pdfDoc;
