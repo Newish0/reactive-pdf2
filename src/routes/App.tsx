@@ -71,9 +71,9 @@ export default function App() {
     };
 
     const handleExportPdf = async (onlySelected: boolean = false) => {
-        const pages = items.map((item) => item.page) as ProxyPage[];
-
-        console.log(onlySelected);
+        const pages = items
+            .filter((item) => !onlySelected || item.selected)
+            .map((item) => item.page) as ProxyPage[];
 
         const mergedPdf = await BetterPDF.pagesToPDF(...pages);
 
