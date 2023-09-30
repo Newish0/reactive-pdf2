@@ -1,12 +1,12 @@
 import GridDNDBox, { DNDItem } from "@components/dndgrid/GridDNDBox";
 import PseudoPageInput from "@components/PseudoPageInput";
 import GridDNDContext from "@components/dndgrid/GridDNDContext";
-import { arrayMove } from "@dnd-kit/sortable";
 import BetterPDF, { ProxyPage } from "@util/BetterPDF";
 import { useEffect, useState } from "react";
 
 import { Button, Divider, Input, Join, Range } from "react-daisyui";
 import { TbZoomIn, TbZoomOut } from "react-icons/tb";
+import { downloadPDF } from "@util/download";
 
 const MIN_SCALE = 100;
 const MAX_SCALE = 600;
@@ -21,6 +21,8 @@ export default function App() {
     const [items, setItems] = useState<DNDItem[]>([]);
 
     const [selectActive, setSelectActive] = useState(false);
+
+    const [exportFileName, setExportFileName] = useState<string>("reactive-pdf-export.pdf");
 
     useEffect(() => {
         setItems(pages.map((p) => proxyPageToDNDItem(p)));
@@ -44,7 +46,7 @@ export default function App() {
         }
     };
 
-    const proxyPageToDNDItem = (page: ProxyPage) => {
+    const proxyPageToDNDItem = (page: ProxyPage): DNDItem => {
         return {
             id: `${page.reference.hash}-${page.reference.page}`,
             title: `${page.reference.file.name} ⋅ ${page.reference.page}`,
@@ -54,12 +56,24 @@ export default function App() {
                     src={page.thumbnail ?? ""}
                 />
             ),
-        } as DNDItem;
+            page,
+        };
     };
 
     const handleScaleChange = async (evt: React.ChangeEvent<HTMLInputElement>) => {
         const newScale = parseInt(evt.target.value);
         setGridScale(newScale);
+    };
+
+    const handleExportFileName = (evt: React.ChangeEvent<HTMLInputElement>) => {
+        setExportFileName(evt.target.value);
+    };
+
+    const handleExportPdf = async () => {
+        const pages = items.map((item) => item.page) as ProxyPage[];
+        const mergedPdf = await BetterPDF.pagesToPDF(...pages);
+
+        downloadPDF(await mergedPdf.save(), exportFileName);
     };
 
     const Controls = () => {
@@ -129,8 +143,10 @@ export default function App() {
                             type="text"
                             color="neutral"
                             placeholder="export.pdf"
+                            value={exportFileName}
+                            onChange={handleExportFileName}
                         />
-                        <Button color="primary" className="join-item">
+                        <Button color="primary" className="join-item" onClick={handleExportPdf}>
                             Export
                         </Button>
                     </Join>

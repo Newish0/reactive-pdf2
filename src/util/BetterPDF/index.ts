@@ -250,6 +250,8 @@ import { GetViewportParameters, PDFPageProxy } from "pdfjs-dist/types/src/displa
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.js?url";
 import { hashArrayBuffer } from "@util/hash";
 import { PDFNotReadyError } from "./errors";
+import { PDFDocument } from "pdf-lib";
+import { copyArrayBuffer, readFileAsArrayBuffer } from "@util/io";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -260,6 +262,7 @@ export interface ProxyPage {
         hash: string;
         file: File;
         page: number; // zeros indexing
+        betterPdf: BetterPDF;
     };
 }
 
@@ -268,6 +271,8 @@ export default class BetterPDF {
     private hash: string;
 
     private pdfJsDoc: pdfjsLib.PDFDocumentProxy | null;
+
+    private pdfLibDoc: PDFDocument | null;
 
     public static async open(file: File) {
         const bPdf = new BetterPDF(file);
@@ -278,6 +283,7 @@ export default class BetterPDF {
     private constructor(file: File) {
         this.file = file;
         this.pdfJsDoc = null;
+        this.pdfLibDoc = null;
         this.hash = "";
     }
 
@@ -305,6 +311,7 @@ export default class BetterPDF {
                     file: this.file,
                     hash: this.hash,
                     page: i,
+                    betterPdf: this,
                 },
             };
             proxyPages.push(proxyPage);
@@ -324,8 +331,14 @@ export default class BetterPDF {
      */
     private async load() {
         const fileData = await this.file.arrayBuffer();
+
         this.hash = await hashArrayBuffer(fileData);
-        this.pdfJsDoc = await pdfjsLib.getDocument({ data: new Uint8Array(fileData) }).promise;
+
+        // Create copies of buffer b/c only one thing can use the same array buffer at a time
+        this.pdfJsDoc = await pdfjsLib.getDocument({
+            data: new Uint8Array(copyArrayBuffer(fileData)),
+        }).promise;
+        this.pdfLibDoc = await PDFDocument.load(new Uint8Array(copyArrayBuffer(fileData)));
     }
 
     /**
@@ -364,5 +377,30 @@ export default class BetterPDF {
         await page.render(renderContext).promise;
 
         return tmpCanvas.toDataURL();
+    }
+
+    public static async pagesToPDF(...pages: ProxyPage[]): Promise<PDFDocument> {
+        const pdfDoc = await PDFDocument.create();
+
+        const bPdfMap = new Map<BetterPDF, ProxyPage[]>();
+
+        for (const p of pages) {
+            const pageArr = bPdfMap.get(p.reference.betterPdf);
+            if (pageArr) pageArr.push(p);
+            else bPdfMap.set(p.reference.betterPdf, [p]);
+        }
+
+        for (const [bPdf, pages] of bPdfMap.entries()) {
+            if (!bPdf.pdfLibDoc) throw new PDFNotReadyError();
+
+            const pdfPages = await pdfDoc.copyPages(
+                bPdf.pdfLibDoc,
+                pages.map((p) => p.reference.page - 1)
+            );
+
+            for (const p of pdfPages) pdfDoc.addPage(p);
+        }
+
+        return pdfDoc;
     }
 }
