@@ -4,23 +4,27 @@ import GridDNDContext from "@components/dndgrid/GridDNDContext";
 import BetterPDF, { ProxyPage } from "@util/BetterPDF";
 import { useEffect, useState } from "react";
 
-import { Button, Divider, Input, Join, Range } from "react-daisyui";
-import { TbZoomIn, TbZoomOut } from "react-icons/tb";
+import { Button, Divider, Input, Join } from "react-daisyui";
+
 import { downloadPDF } from "@util/download";
+import ControlsBarContext, { ControlsBarSettings } from "@components/ControlsBarContext";
+import ControlsBar from "@components/ControlsBar";
 
 const MIN_SCALE = 100;
-const MAX_SCALE = 600;
+const MAX_SCALE = 1000;
 
 // TODO: User settings
 const preferAnimation = true;
 
 export default function App() {
-    const [gridScale, setGridScale] = useState(160);
     const [pages, setPages] = useState<ProxyPage[]>([]);
 
     const [items, setItems] = useState<DNDItem[]>([]);
 
-    const [selectActive, setSelectActive] = useState(false);
+    const [ctrlBarVals, setCtrlBarVals] = useState<ControlsBarSettings>({
+        gridScale: 160,
+        selectActive: false,
+    });
 
     const [exportFileName, setExportFileName] = useState<string>("reactive-pdf-export.pdf");
 
@@ -61,11 +65,6 @@ export default function App() {
         };
     };
 
-    const handleScaleChange = async (evt: React.ChangeEvent<HTMLInputElement>) => {
-        const newScale = parseInt(evt.target.value);
-        setGridScale(newScale);
-    };
-
     const handleExportFileName = (evt: React.ChangeEvent<HTMLInputElement>) => {
         setExportFileName(evt.target.value);
     };
@@ -80,38 +79,8 @@ export default function App() {
         downloadPDF(await mergedPdf.save(), exportFileName);
     };
 
-    const Controls = () => {
-        return (
-            <div className="bg-base-200 p-4 rounded-box flex justify-between items-center">
-                <div className="w-1/2 flex align-middle gap-4">
-                    <TbZoomOut className="text-2xl" />
-                    <Range
-                        size="sm"
-                        min={MIN_SCALE}
-                        max={MAX_SCALE}
-                        value={gridScale}
-                        onChange={handleScaleChange}
-                    />
-                    <TbZoomIn className="text-2xl" />
-                </div>
-
-                <div>
-                    {selectActive ? (
-                        <Button color="ghost" onClick={() => setSelectActive(false)}>
-                            <b className="text-primary">Done</b>
-                        </Button>
-                    ) : (
-                        <Button color="ghost" onClick={() => setSelectActive(true)}>
-                            <span className="text-primary">Select</span>
-                        </Button>
-                    )}
-                </div>
-            </div>
-        );
-    };
-
     return (
-        <section className="px-6 py-8 h-screen ">
+        <section className="px-6 py-8 h-screen w-max-screen">
             <div className="flex flex-col space-y-4 h-full">
                 <div className="prose prose-sm md:prose-base">
                     <h1>Reactive PDF</h1>
@@ -119,15 +88,22 @@ export default function App() {
 
                 <Divider></Divider>
 
-                <Controls />
+                <ControlsBarContext.Provider value={[ctrlBarVals, setCtrlBarVals]}>
+                    <ControlsBar
+                        gridScale={{
+                            min: MIN_SCALE,
+                            max: MAX_SCALE,
+                        }}
+                    />
+                </ControlsBarContext.Provider>
 
                 <div className="rounded-box p-8 bg-base-200 flex-shrink h-full overflow-x-hidden overflow-y-auto scrollbar">
                     <GridDNDContext.Provider value={[items, setItems]}>
                         <GridDNDBox
                             spacing={24}
-                            gridSize={gridScale}
+                            gridSize={ctrlBarVals.gridScale}
                             showFullTitle={false}
-                            allowSelection={selectActive}
+                            allowSelection={ctrlBarVals.selectActive}
                             end={
                                 <div className="p-4 m-auto h-full">
                                     <PseudoPageInput
@@ -151,7 +127,7 @@ export default function App() {
                             onChange={handleExportFileName}
                         />
 
-                        {selectActive ? (
+                        {ctrlBarVals.selectActive ? (
                             <>
                                 <Button
                                     color="primary"
