@@ -9,6 +9,7 @@ import { Button, Divider, Input, Join } from "react-daisyui";
 import { downloadPDF } from "@util/download";
 import ControlsBarContext, { ControlsBarSettings } from "@components/ControlsBarContext";
 import ControlsBar from "@components/ControlsBar";
+import { proxyPageToDNDItem } from "@util/convert";
 
 const MIN_SCALE = 100;
 const MAX_SCALE = 1000;
@@ -48,21 +49,6 @@ export default function App() {
                 setPages([...pages, ...(await bPdf.toProxyPages(0.75))]);
             }
         }
-    };
-
-    const proxyPageToDNDItem = (page: ProxyPage): DNDItem => {
-        return {
-            id: `${page.reference.hash}-${page.reference.page}`,
-            title: `${page.reference.file.name} ⋅ ${page.reference.page}`,
-            content: (
-                <img
-                    className="object-contain border border-neutral rounded-md"
-                    src={page.thumbnail ?? ""}
-                />
-            ),
-            selected: false,
-            page,
-        };
     };
 
     const handleExportFileName = (evt: React.ChangeEvent<HTMLInputElement>) => {
