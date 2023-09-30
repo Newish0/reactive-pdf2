@@ -75,8 +75,6 @@ const GridDNDBox = ({
         setActiveId(null);
     };
 
-    console.log(items);
-
     const handleDragStart = (event: DragStartEvent) => {
         setActiveId(event.active.id.toString());
     };
