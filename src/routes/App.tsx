@@ -56,6 +56,7 @@ export default function App() {
                     src={page.thumbnail ?? ""}
                 />
             ),
+            selected: false,
             page,
         };
     };
@@ -69,8 +70,11 @@ export default function App() {
         setExportFileName(evt.target.value);
     };
 
-    const handleExportPdf = async () => {
+    const handleExportPdf = async (onlySelected: boolean = false) => {
         const pages = items.map((item) => item.page) as ProxyPage[];
+
+        console.log(onlySelected);
+
         const mergedPdf = await BetterPDF.pagesToPDF(...pages);
 
         downloadPDF(await mergedPdf.save(), exportFileName);
@@ -146,9 +150,33 @@ export default function App() {
                             value={exportFileName}
                             onChange={handleExportFileName}
                         />
-                        <Button color="primary" className="join-item" onClick={handleExportPdf}>
-                            Export
-                        </Button>
+
+                        {selectActive ? (
+                            <>
+                                <Button
+                                    color="primary"
+                                    className="join-item"
+                                    onClick={() => handleExportPdf(false)}
+                                >
+                                    Export
+                                </Button>
+                                <Button
+                                    color="accent"
+                                    className="join-item"
+                                    onClick={() => handleExportPdf(true)}
+                                >
+                                    Export Selected
+                                </Button>
+                            </>
+                        ) : (
+                            <Button
+                                color="primary"
+                                className="join-item"
+                                onClick={() => handleExportPdf(false)}
+                            >
+                                Export
+                            </Button>
+                        )}
                     </Join>
                 </div>
             </div>

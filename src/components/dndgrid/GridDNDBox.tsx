@@ -10,7 +10,7 @@ import {
     useSensors,
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import GridContainer from "./GridContainer";
 import GridItem from "./GridItem";
 import { Badge, Indicator, Stack, Tooltip } from "react-daisyui";
@@ -20,6 +20,7 @@ import GridDNDContext from "./GridDNDContext";
 export interface DNDItem {
     id: string;
     content: React.ReactNode;
+    selected: boolean;
     title?: string;
     [key: string]: unknown;
 }
@@ -44,44 +45,28 @@ const GridDNDBox = ({
 }: GridDNDBoxProps) => {
     const [items, setItems] = useContext(GridDNDContext);
     const [activeId, setActiveId] = useState<string | null>(null);
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
-    // Clear selections on "allowSelection" change
-    useEffect(() => {
-        setSelectedIds([]);
-    }, [allowSelection]);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
 
         if (active && over && active.id !== over.id) {
             setItems((items) => {
-                const tmpOldIndex = items.findIndex((item) => item.id === active.id);
+                // Get desired index before any operations
                 const newIndex = items.findIndex((item) => item.id === over.id);
 
-                const isMoveRight = newIndex > tmpOldIndex;
+                // Move selected items
+                items.forEach((item) => {
+                    if (!item.selected || item.id === active.id) return;
 
-                const moveActive = () => {
-                    // move active
-                    const oldIndex = items.findIndex((item) => item.id === active.id);
-                    items = arrayMove(items, oldIndex, newIndex);
-                };
+                    // get latest item (can't use index from forEach due to move)
+                    const index = items.findIndex((latestItem) => latestItem === item);
 
-                const moveSelected = () => {
-                    // Move all selected elements to immediately after active
-                    for (const selectedId of selectedIds) {
-                        const selectedIndex = items.findIndex((item) => item.id === selectedId);
-                        items = arrayMove(items, selectedIndex, newIndex);
-                    }
-                };
+                    items = arrayMove(items, index, newIndex);
+                });
 
-                if (isMoveRight) {
-                    moveActive();
-                    moveSelected();
-                } else {
-                    moveSelected();
-                    moveActive();
-                }
+                // Move active item
+                const oldIndex = items.findIndex((item) => item.id === active.id);
+                items = arrayMove(items, oldIndex, newIndex);
 
                 return items;
             });
@@ -90,18 +75,18 @@ const GridDNDBox = ({
         setActiveId(null);
     };
 
+    console.log(items);
+
     const handleDragStart = (event: DragStartEvent) => {
         setActiveId(event.active.id.toString());
     };
 
     const handleSelection = (id: string, isSelected: boolean) => {
-        if (isSelected) {
-            setSelectedIds([...selectedIds, id]);
-        } else {
-            const index = selectedIds.findIndex((curId) => curId === id);
-            if (index !== -1) selectedIds.splice(index, 1);
-            setSelectedIds([...selectedIds]);
-        }
+        const item = items.find((item) => item.id === id);
+        if (!item) return;
+        item.selected = isSelected;
+
+        setItems([...items]); // cause update
     };
 
     const sensors = useSensors(
@@ -116,6 +101,8 @@ const GridDNDBox = ({
             },
         })
     );
+
+    const selectedItems = items.filter((item) => item.selected);
 
     return (
         <DndContext
@@ -169,20 +156,21 @@ const GridDNDBox = ({
             </SortableContext>
 
             <DragOverlay adjustScale={true}>
-                {selectedIds.length > 1 ? (
+                {selectedItems.length > 1 ? (
                     <Indicator>
                         <Badge
                             color="primary"
                             className={twMerge(Indicator.Item.className(), "z-10")}
                         >
-                            {selectedIds.length}
+                            {selectedItems.length}
                         </Badge>
 
                         {/* Active item always on top */}
                         <Stack style={{ width: `${gridSize}px` }}>
                             {items.find((item) => item.id === activeId)?.content}
-                            {...items
-                                .filter(({ id }) => selectedIds.includes(id) && id !== activeId)
+
+                            {...selectedItems
+                                .filter(({ id }) => id !== activeId)
                                 .map(({ content }) => content)}
                         </Stack>
                     </Indicator>
