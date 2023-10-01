@@ -4,20 +4,18 @@ import GridDNDContext from "@components/dndgrid/GridDNDContext";
 import BetterPDF, { ProxyPage } from "@util/BetterPDF";
 import { useEffect, useState } from "react";
 
-import { Button, Divider, Input, Join } from "react-daisyui";
+import { Button, Input, Join } from "react-daisyui";
 
 import { downloadPDF } from "@util/download";
 import ControlsBarContext, { ControlsBarSettings } from "@components/ControlsBarContext";
 import ControlsBar from "@components/ControlsBar";
 import { proxyPageToDNDItem } from "@util/convert";
-
-const MIN_SCALE = 100;
-const MAX_SCALE = 1000;
-
-// TODO: User settings
-const preferAnimation = true;
+import PageContainer from "@components/PageContainer";
+import { useAppSettings } from "@atoms/appsettings";
 
 export default function App() {
+    const [appSettings] = useAppSettings();
+
     const [pages, setPages] = useState<ProxyPage[]>([]);
 
     const [items, setItems] = useState<DNDItem[]>([]);
@@ -40,7 +38,7 @@ export default function App() {
 
         for (const f of files) {
             const bPdf = await BetterPDF.open(f);
-            if (preferAnimation) {
+            if (appSettings.preferAnimation) {
                 setPages([
                     ...pages,
                     ...(await bPdf.toProxyPages(0.75, (curPage) =>
@@ -80,72 +78,49 @@ export default function App() {
     };
 
     return (
-        <section className="px-6 py-8 h-screen w-max-screen">
-            <div className="flex flex-col space-y-4 h-full">
-                <div className="prose prose-sm md:prose-base">
-                    <h1>Reactive PDF</h1>
-                </div>
+        <PageContainer title="Reactive PDF">
+            <ControlsBarContext.Provider value={[ctrlBarVals, setCtrlBarVals]}>
+                <ControlsBar
+                    gridScale={{
+                        min: appSettings.gridScale.min,
+                        max: appSettings.gridScale.max,
+                    }}
+                    onDeleteSelected={selectedItems.length ? handleDeleteSelected : undefined}
+                />
+            </ControlsBarContext.Provider>
 
-                <Divider></Divider>
+            <div className="rounded-box p-8 bg-base-200 flex-shrink h-full overflow-x-hidden overflow-y-auto scrollbar">
+                <GridDNDContext.Provider value={[items, setItems]}>
+                    <GridDNDBox
+                        spacing={24}
+                        gridSize={ctrlBarVals.gridScale}
+                        showFullTitle={false}
+                        allowSelection={ctrlBarVals.selectActive}
+                        end={
+                            <div className="p-4 m-auto h-full">
+                                <PseudoPageInput
+                                    onChange={handleAddFiles}
+                                    accept="application/pdf"
+                                ></PseudoPageInput>
+                            </div>
+                        }
+                    ></GridDNDBox>
+                </GridDNDContext.Provider>
+            </div>
 
-                <ControlsBarContext.Provider value={[ctrlBarVals, setCtrlBarVals]}>
-                    <ControlsBar
-                        gridScale={{
-                            min: MIN_SCALE,
-                            max: MAX_SCALE,
-                        }}
-                        onDeleteSelected={selectedItems.length ? handleDeleteSelected : undefined}
+            <div className="rounded-box p-8 bg-base-200">
+                <Join className="w-full">
+                    <Input
+                        className="join-item w-full"
+                        type="text"
+                        color="neutral"
+                        placeholder="export.pdf"
+                        value={exportFileName}
+                        onChange={handleExportFileName}
                     />
-                </ControlsBarContext.Provider>
 
-                <div className="rounded-box p-8 bg-base-200 flex-shrink h-full overflow-x-hidden overflow-y-auto scrollbar">
-                    <GridDNDContext.Provider value={[items, setItems]}>
-                        <GridDNDBox
-                            spacing={24}
-                            gridSize={ctrlBarVals.gridScale}
-                            showFullTitle={false}
-                            allowSelection={ctrlBarVals.selectActive}
-                            end={
-                                <div className="p-4 m-auto h-full">
-                                    <PseudoPageInput
-                                        onChange={handleAddFiles}
-                                        accept="application/pdf"
-                                    ></PseudoPageInput>
-                                </div>
-                            }
-                        ></GridDNDBox>
-                    </GridDNDContext.Provider>
-                </div>
-
-                <div className="rounded-box p-8 bg-base-200">
-                    <Join className="w-full">
-                        <Input
-                            className="join-item w-full"
-                            type="text"
-                            color="neutral"
-                            placeholder="export.pdf"
-                            value={exportFileName}
-                            onChange={handleExportFileName}
-                        />
-
-                        {ctrlBarVals.selectActive ? (
-                            <>
-                                <Button
-                                    color="primary"
-                                    className="join-item"
-                                    onClick={() => handleExportPdf(false)}
-                                >
-                                    Export
-                                </Button>
-                                <Button
-                                    color="accent"
-                                    className="join-item"
-                                    onClick={() => handleExportPdf(true)}
-                                >
-                                    Export Selected
-                                </Button>
-                            </>
-                        ) : (
+                    {ctrlBarVals.selectActive ? (
+                        <>
                             <Button
                                 color="primary"
                                 className="join-item"
@@ -153,10 +128,25 @@ export default function App() {
                             >
                                 Export
                             </Button>
-                        )}
-                    </Join>
-                </div>
+                            <Button
+                                color="accent"
+                                className="join-item"
+                                onClick={() => handleExportPdf(true)}
+                            >
+                                Export Selected
+                            </Button>
+                        </>
+                    ) : (
+                        <Button
+                            color="primary"
+                            className="join-item"
+                            onClick={() => handleExportPdf(false)}
+                        >
+                            Export
+                        </Button>
+                    )}
+                </Join>
             </div>
-        </section>
+        </PageContainer>
     );
 }

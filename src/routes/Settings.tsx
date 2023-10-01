@@ -1,3 +1,5 @@
+import PageContainer from "@components/PageContainer";
+
 export default function Settings() {
-    return <div>Settings</div>;
+    return <PageContainer title="Settings"></PageContainer>;
 }

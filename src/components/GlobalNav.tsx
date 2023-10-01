@@ -16,9 +16,9 @@ export default function GlobalNav({ children }: React.PropsWithChildren) {
 
                 <label
                     htmlFor="my-drawer-2"
-                    className="btn btn-primary absolute top-0 drawer-button lg:hidden"
+                    className="btn btn-primary btn-square absolute top-0 drawer-button lg:hidden"
                 >
-                    <TbLayoutSidebarLeftExpand />
+                    <TbLayoutSidebarLeftExpand className="text-2xl" />
                 </label>
             </div>
             <div className="drawer-side">
