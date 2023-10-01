@@ -17,6 +17,8 @@ import { Badge, Indicator, Stack, Tooltip } from "react-daisyui";
 import { twMerge } from "tailwind-merge";
 import GridDNDContext from "./GridDNDContext";
 import { useKeysHeld } from "@hooks/input";
+import ContextMenu from "@components/ContextMenu";
+import GridItemMenu from "./GridItemMenu";
 
 export interface DNDItem {
     id: string;
@@ -97,9 +99,6 @@ const GridDNDBox = ({
             if (lastItemIndex > -1) {
                 const startIndex = Math.min(itemIndex, lastItemIndex);
                 const endIndex = Math.max(itemIndex, lastItemIndex);
-
-                console.log(startIndex, endIndex, isSelected);
-
                 for (let i = startIndex; i < endIndex && items[i]; i++) {
                     items[i].selected = isSelected;
                 }
@@ -107,9 +106,21 @@ const GridDNDBox = ({
             setLastSelectedItemId(id);
         }
 
-        console.log(items);
-
         setItems([...items]); // cause update
+    };
+
+    const handleDeleteItem = (itemToDelete: DNDItem) => {
+        setItems((items) => {
+            const index = items.findIndex((item) => item === itemToDelete);
+            if (index > -1) items.splice(index, 1);
+            return [...items];
+        });
+    };
+
+    const handleExportItemAsImage = (item: DNDItem) => {
+        console.log(item);
+        // TODO: Change GridItemMenu to accept an object that allows user to extend functionalities.
+        // i.e. the export page as image is be an function extended on this generalized dnd context menu
     };
 
     const sensors = useSensors(
@@ -139,41 +150,50 @@ const GridDNDBox = ({
                     {startElement}
 
                     {items.map((item) => (
-                        <GridItem
+                        <ContextMenu
                             key={item.id}
-                            id={item.id}
-                            selected={item.selected}
-                            selectable={allowSelection}
-                            onSelectionChange={handleSelection}
+                            menuItems={
+                                <GridItemMenu
+                                    onDelete={() => handleDeleteItem(item)}
+                                    onExportPageAsImage={() => handleExportItemAsImage(item)}
+                                />
+                            }
                         >
-                            <div className="flex flex-col align-middle">
-                                {item.content}
+                            <GridItem
+                                id={item.id}
+                                selected={item.selected}
+                                selectable={allowSelection}
+                                onSelectionChange={handleSelection}
+                            >
+                                <div className="flex flex-col align-middle">
+                                    {item.content}
 
-                                {showFullTitle ? (
-                                    <div
-                                        style={{ width: `${gridSize}px` }}
-                                        className="m-auto text-center"
-                                    >
-                                        {item.title}
-                                    </div>
-                                ) : (
-                                    <div className="flex justify-center">
-                                        <Tooltip
-                                            message={item.title ?? ""}
-                                            position="bottom"
-                                            className="z-10"
+                                    {showFullTitle ? (
+                                        <div
+                                            style={{ width: `${gridSize}px` }}
+                                            className="m-auto text-center"
                                         >
-                                            <div
-                                                style={{ width: `${gridSize}px` }}
-                                                className="text-center whitespace-nowrap overflow-ellipsis overflow-hidden"
+                                            {item.title}
+                                        </div>
+                                    ) : (
+                                        <div className="flex justify-center">
+                                            <Tooltip
+                                                message={item.title ?? ""}
+                                                position="bottom"
+                                                className="z-10"
                                             >
-                                                {item.title}
-                                            </div>
-                                        </Tooltip>
-                                    </div>
-                                )}
-                            </div>
-                        </GridItem>
+                                                <div
+                                                    style={{ width: `${gridSize}px` }}
+                                                    className="text-center whitespace-nowrap overflow-ellipsis overflow-hidden"
+                                                >
+                                                    {item.title}
+                                                </div>
+                                            </Tooltip>
+                                        </div>
+                                    )}
+                                </div>
+                            </GridItem>
+                        </ContextMenu>
                     ))}
                     {endElement}
                 </GridContainer>
