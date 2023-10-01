@@ -16,6 +16,7 @@ import GridItem from "./GridItem";
 import { Badge, Indicator, Stack, Tooltip } from "react-daisyui";
 import { twMerge } from "tailwind-merge";
 import GridDNDContext from "./GridDNDContext";
+import { useKeysHeld } from "@hooks/input";
 
 export interface DNDItem {
     id: string;
@@ -45,6 +46,9 @@ const GridDNDBox = ({
 }: GridDNDBoxProps) => {
     const [items, setItems] = useContext(GridDNDContext);
     const [activeId, setActiveId] = useState<string | null>(null);
+    const [lastSelectedItemId, setLastSelectedItemId] = useState<string>();
+
+    const keysHeld = useKeysHeld();
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -80,9 +84,30 @@ const GridDNDBox = ({
     };
 
     const handleSelection = (id: string, isSelected: boolean) => {
-        const item = items.find((item) => item.id === id);
-        if (!item) return;
+        const itemIndex = items.findIndex((item) => item.id === id);
+        if (itemIndex < 0) return;
+
+        const item = items[itemIndex];
+
         item.selected = isSelected;
+
+        // Select all items in between two selection if held shift
+        if (keysHeld["Shift"]) {
+            const lastItemIndex = items.findIndex((item) => item.id === lastSelectedItemId);
+            if (lastItemIndex > -1) {
+                const startIndex = Math.min(itemIndex, lastItemIndex);
+                const endIndex = Math.max(itemIndex, lastItemIndex);
+
+                console.log(startIndex, endIndex, isSelected);
+
+                for (let i = startIndex; i < endIndex && items[i]; i++) {
+                    items[i].selected = isSelected;
+                }
+            }
+            setLastSelectedItemId(id);
+        }
+
+        console.log(items);
 
         setItems([...items]); // cause update
     };
@@ -117,6 +142,7 @@ const GridDNDBox = ({
                         <GridItem
                             key={item.id}
                             id={item.id}
+                            selected={item.selected}
                             selectable={allowSelection}
                             onSelectionChange={handleSelection}
                         >

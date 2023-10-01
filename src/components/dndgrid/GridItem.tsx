@@ -5,9 +5,12 @@ import { Checkbox, Indicator } from "react-daisyui";
 interface GridItemProps {
     id: string;
     children: React.ReactNode;
+
     style?: React.CSSProperties;
 
-    selectable?: boolean;
+    selected: boolean;
+    selectable: boolean;
+
     onSelectionChange?: (id: string, isSelected: boolean) => void;
 }
 
@@ -15,6 +18,7 @@ export default function GridItem({
     id,
     children,
     selectable,
+    selected,
     onSelectionChange: handleSelectionChange,
     style,
 }: GridItemProps) {
@@ -41,6 +45,7 @@ export default function GridItem({
                         <Checkbox
                             color="primary"
                             className="backdrop-blur-sm backdrop-brightness-75"
+                            checked={selected}
                             onChange={(evt) => {
                                 if (handleSelectionChange)
                                     handleSelectionChange(id, evt.target.checked);
@@ -56,3 +61,8 @@ export default function GridItem({
         </div>
     );
 }
+
+GridItem.defaultProps = {
+    selected: false,
+    selectable: false,
+};

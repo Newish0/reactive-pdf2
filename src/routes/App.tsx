@@ -29,6 +29,8 @@ export default function App() {
 
     const [exportFileName, setExportFileName] = useState<string>("reactive-pdf-export.pdf");
 
+    const selectedItems = items.filter((item) => item.selected);
+
     useEffect(() => {
         setItems(pages.map((p) => proxyPageToDNDItem(p)));
     }, [pages]);
@@ -65,6 +67,18 @@ export default function App() {
         downloadPDF(await mergedPdf.save(), exportFileName);
     };
 
+    const handleDeleteSelected = () => {
+        setItems((items) => {
+            selectedItems.forEach((selectedItem) => {
+                const index = items.findIndex((item) => item === selectedItem);
+                items.splice(index, 1);
+            });
+            return items;
+        });
+
+        setCtrlBarVals((oldVals) => ({ ...oldVals, selectActive: false }));
+    };
+
     return (
         <section className="px-6 py-8 h-screen w-max-screen">
             <div className="flex flex-col space-y-4 h-full">
@@ -80,6 +94,7 @@ export default function App() {
                             min: MIN_SCALE,
                             max: MAX_SCALE,
                         }}
+                        onDeleteSelected={selectedItems.length ? handleDeleteSelected : undefined}
                     />
                 </ControlsBarContext.Provider>
 

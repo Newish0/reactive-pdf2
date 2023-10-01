@@ -9,9 +9,10 @@ export interface ControlsBarProps {
         min: number;
         max: number;
     };
+    onDeleteSelected?: () => void;
 }
 
-export default function ControlsBar({ gridScale }: ControlsBarProps) {
+export default function ControlsBar({ gridScale, onDeleteSelected }: ControlsBarProps) {
     const [controls, setControls] = useContext(ControlsBarContext);
 
     const handleScaleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,9 +39,17 @@ export default function ControlsBar({ gridScale }: ControlsBarProps) {
 
             <div>
                 {controls.selectActive ? (
-                    <Button color="ghost" onClick={() => handleSelectActive(false)}>
-                        <b className="text-primary">Done</b>
-                    </Button>
+                    <>
+                        {onDeleteSelected && (
+                            <Button color="ghost" onClick={onDeleteSelected}>
+                                <span className="text-primary">Delete Selected</span>
+                            </Button>
+                        )}
+
+                        <Button color="ghost" onClick={() => handleSelectActive(false)}>
+                            <b className="text-primary">Done</b>
+                        </Button>
+                    </>
                 ) : (
                     <Button color="ghost" onClick={() => handleSelectActive(true)}>
                         <span className="text-primary">Select</span>
