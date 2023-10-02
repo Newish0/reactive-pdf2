@@ -21,4 +21,5 @@ export default defineConfig({
             },
         ],
     },
+    // base: "https://newish0.github.io/reactive-pdf2",
 });

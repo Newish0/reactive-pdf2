@@ -18,7 +18,9 @@ export default function GridItemMenu({
                 </span>
             </Menu.Item>
             <Menu.Item onClickCapture={handleExportPageAsImage}>
-                <span><TbPhotoDown /> Export page as image</span>
+                <span>
+                    <TbPhotoDown /> Export page as image
+                </span>
             </Menu.Item>
         </Menu>
     );

@@ -24,7 +24,7 @@ export default function ControlsBar({ gridScale, onDeleteSelected }: ControlsBar
     };
 
     return (
-        <div className="bg-base-200 p-4 rounded-box flex justify-between items-center">
+        <>
             <div className="w-1/2 flex align-middle gap-4">
                 <TbZoomOut className="text-2xl" />
                 <Range
@@ -56,6 +56,6 @@ export default function ControlsBar({ gridScale, onDeleteSelected }: ControlsBar
                     </Button>
                 )}
             </div>
-        </div>
+        </>
     );
 }

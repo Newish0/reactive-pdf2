@@ -12,6 +12,7 @@ import ControlsBar from "@components/ControlsBar";
 import { proxyPageToDNDItem } from "@util/convert";
 import PageContainer from "@components/PageContainer";
 import { useAppSettings } from "@atoms/appsettings";
+import SectionContainer from "@components/SectionContainer";
 
 export default function App() {
     const [appSettings] = useAppSettings();
@@ -79,17 +80,19 @@ export default function App() {
 
     return (
         <PageContainer title="Reactive PDF">
-            <ControlsBarContext.Provider value={[ctrlBarVals, setCtrlBarVals]}>
-                <ControlsBar
-                    gridScale={{
-                        min: appSettings.gridScale.min,
-                        max: appSettings.gridScale.max,
-                    }}
-                    onDeleteSelected={selectedItems.length ? handleDeleteSelected : undefined}
-                />
-            </ControlsBarContext.Provider>
+            <SectionContainer className="flex justify-between items-center">
+                <ControlsBarContext.Provider value={[ctrlBarVals, setCtrlBarVals]}>
+                    <ControlsBar
+                        gridScale={{
+                            min: appSettings.gridScale.min,
+                            max: appSettings.gridScale.max,
+                        }}
+                        onDeleteSelected={selectedItems.length ? handleDeleteSelected : undefined}
+                    />
+                </ControlsBarContext.Provider>
+            </SectionContainer>
 
-            <div className="rounded-box p-8 bg-base-200 flex-shrink h-full overflow-x-hidden overflow-y-auto scrollbar">
+            <SectionContainer className="flex-shrink h-full overflow-x-hidden overflow-y-auto scrollbar">
                 <GridDNDContext.Provider value={[items, setItems]}>
                     <GridDNDBox
                         spacing={24}
@@ -106,9 +109,9 @@ export default function App() {
                         }
                     ></GridDNDBox>
                 </GridDNDContext.Provider>
-            </div>
+            </SectionContainer>
 
-            <div className="rounded-box p-8 bg-base-200">
+            <SectionContainer>
                 <Join className="w-full">
                     <Input
                         className="join-item w-full"
@@ -146,7 +149,7 @@ export default function App() {
                         </Button>
                     )}
                 </Join>
-            </div>
+            </SectionContainer>
         </PageContainer>
     );
 }
