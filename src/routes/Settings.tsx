@@ -4,9 +4,9 @@ import SectionContainer from "@components/SectionContainer";
 import SettingsOption, { SettingsOptionPosition } from "@components/SettingsOption";
 import ThemeItem from "@components/ThemeItem";
 import { setGlobalTheme } from "@util/appearance";
-import { useEffect } from "react";
-import { Toggle, useTheme } from "react-daisyui";
-import { TbEaseInOutControlPoints, TbPalette } from "react-icons/tb";
+import { useEffect, useState } from "react";
+import { Input, Toggle, useTheme } from "react-daisyui";
+import { TbEaseInOutControlPoints, TbPalette, TbZoomInArea } from "react-icons/tb";
 
 const AVAILABLE_THEMES = ["light", "dark", "emerald", "night", "business", "cyberpunk"];
 
@@ -32,6 +32,17 @@ export default function Settings() {
                     position={SettingsOptionPosition.Right}
                 >
                     <PreferAnimationControl />
+                </SettingsOption>
+            </SectionContainer>
+
+            <SectionContainer className="p-4">
+                <SettingsOption
+                    title="Zoom Scale"
+                    description="Set the max and min zoom of your thumbnails."
+                    icon={<TbZoomInArea />}
+                    position={SettingsOptionPosition.Right}
+                >
+                    <GridScaleControl />
                 </SettingsOption>
             </SectionContainer>
         </PageContainer>
@@ -74,7 +85,82 @@ function PreferAnimationControl() {
 
     return (
         <div className="float-right">
-            <Toggle checked={appSettings.preferAnimation} onChange={handleToggle} color="primary"/>
+            <Toggle checked={appSettings.preferAnimation} onChange={handleToggle} color="primary" />
+        </div>
+    );
+}
+
+function GridScaleControl() {
+    const [appSettings, setAppSettings] = useAppSettings();
+
+    const [error, setError] = useState({
+        min: false,
+        max: false,
+    });
+
+    const [tmpScale, setTmpScale] = useState<{ min: number | string; max: number | string }>({
+        ...appSettings.gridScale,
+    });
+
+    const handleSetMin = (evt: React.ChangeEvent<HTMLInputElement>) => {
+        setTmpScale((scale) => ({ ...scale, min: evt.target.value }));
+
+        const newVal = Number(evt.target.value);
+
+        if (isNaN(newVal) || newVal <= 0) {
+            setError((err) => ({ ...err, min: true }));
+            return;
+        }
+
+        setError((err) => ({ ...err, min: false }));
+        setAppSettings({ ...appSettings, gridScale: { ...appSettings.gridScale, min: newVal } });
+    };
+
+    const handleSetMax = (evt: React.ChangeEvent<HTMLInputElement>) => {
+        setTmpScale((scale) => ({ ...scale, max: evt.target.value }));
+
+        const newVal = Number(evt.target.value);
+
+        if (isNaN(newVal) || newVal <= 0) {
+            setError((err) => ({ ...err, max: true }));
+            return;
+        }
+
+        setError((err) => ({ ...err, max: false }));
+        setAppSettings({ ...appSettings, gridScale: { ...appSettings.gridScale, max: newVal } });
+    };
+
+    return (
+        <div className="flex gap-4 justify-end">
+            <div className="flex w-32 component-preview items-center justify-center gap-2 font-sans">
+                <div className="form-control w-full max-w-xs">
+                    <label className="label">
+                        <span className="label-text">Min</span>
+                        {error.min && <span className="label-text-alt text-error">Invalid</span>}
+                    </label>
+                    <Input
+                        size="sm"
+                        value={tmpScale.min}
+                        onChange={handleSetMin}
+                        color={error.min ? "error" : "neutral"}
+                    />
+                </div>
+            </div>
+
+            <div className="flex w-32 component-preview items-center justify-center gap-2 font-sans">
+                <div className="form-control w-full max-w-xs">
+                    <label className="label">
+                        <span className="label-text">Max</span>
+                        {error.max && <span className="label-text-alt text-error">Invalid</span>}
+                    </label>
+                    <Input
+                        size="sm"
+                        value={tmpScale.max}
+                        onChange={handleSetMax}
+                        color={error.max ? "error" : "neutral"}
+                    />
+                </div>
+            </div>
         </div>
     );
 }
