@@ -8,6 +8,7 @@ import ErrorPage from "@routes/ErrorPage";
 import App from "@routes/App";
 import Settings from "@routes/Settings";
 
+
 const router = createBrowserRouter([
     {
         path: "/",

@@ -17,7 +17,7 @@ const getInitialAppSettings = () => {
         ? JSON.parse(settingsJSON)
         : {
               // Default settings go here
-              theme: "light",
+              theme: "night",
               preferAnimation: false,
               gridScale: {
                   min: 100,
