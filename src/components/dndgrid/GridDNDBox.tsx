@@ -10,7 +10,7 @@ import {
     useSensors,
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import GridContainer from "./GridContainer";
 import GridItem from "./GridItem";
 import { Badge, Indicator, Stack, Tooltip } from "react-daisyui";
@@ -48,9 +48,11 @@ const GridDNDBox = ({
 }: GridDNDBoxProps) => {
     const [items, setItems] = useContext(GridDNDContext);
     const [activeId, setActiveId] = useState<string | null>(null);
-    const [lastSelectedItemId, setLastSelectedItemId] = useState<string>();
+    const [lastSelectedItemId, setLastSelectedItemId] = useState<string | null>(null);
 
     const keysHeld = useKeysHeld();
+
+    useEffect(() => setLastSelectedItemId(null), [keysHeld, setLastSelectedItemId]);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -95,15 +97,20 @@ const GridDNDBox = ({
 
         // Select all items in between two selection if held shift
         if (keysHeld["Shift"]) {
-            const lastItemIndex = items.findIndex((item) => item.id === lastSelectedItemId);
-            if (lastItemIndex > -1) {
-                const startIndex = Math.min(itemIndex, lastItemIndex);
-                const endIndex = Math.max(itemIndex, lastItemIndex);
-                for (let i = startIndex; i < endIndex && items[i]; i++) {
-                    items[i].selected = isSelected;
+            if (lastSelectedItemId) {
+                const lastItemIndex = items.findIndex((item) => item.id === lastSelectedItemId);
+                if (lastItemIndex > -1) {
+                    const startIndex = Math.min(itemIndex, lastItemIndex);
+                    const endIndex = Math.max(itemIndex, lastItemIndex);
+                    for (let i = startIndex; i < endIndex && items[i]; i++) {
+                        items[i].selected = isSelected;
+                    }
                 }
+            } else {
+                setLastSelectedItemId(id);
             }
-            setLastSelectedItemId(id);
+        } else {
+            setLastSelectedItemId(null);
         }
 
         setItems([...items]); // cause update
