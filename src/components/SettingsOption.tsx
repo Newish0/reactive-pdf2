@@ -25,7 +25,7 @@ export default function SettingsOption({
                 <div className="text-2xl">{icon}</div>
 
                 <div className="prose prose-sm">
-                    <h3>{title}</h3>
+                    <h3 className="my-0">{title}</h3>
                     <p>{description}</p>
                 </div>
 

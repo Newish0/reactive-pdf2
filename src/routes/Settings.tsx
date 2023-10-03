@@ -5,8 +5,8 @@ import SettingsOption, { SettingsOptionPosition } from "@components/SettingsOpti
 import ThemeItem from "@components/ThemeItem";
 import { setGlobalTheme } from "@util/appearance";
 import { useEffect } from "react";
-import { useTheme } from "react-daisyui";
-import { TbPalette } from "react-icons/tb";
+import { Toggle, useTheme } from "react-daisyui";
+import { TbEaseInOutControlPoints, TbPalette } from "react-icons/tb";
 
 const AVAILABLE_THEMES = ["light", "dark", "emerald", "night", "business", "cyberpunk"];
 
@@ -21,6 +21,17 @@ export default function Settings() {
                     position={SettingsOptionPosition.Bottom}
                 >
                     <ThemeSettingControl />
+                </SettingsOption>
+            </SectionContainer>
+
+            <SectionContainer className="p-4">
+                <SettingsOption
+                    title="Prefer Animation"
+                    description="Make the app slicker at the cost of performance."
+                    icon={<TbEaseInOutControlPoints />}
+                    position={SettingsOptionPosition.Right}
+                >
+                    <PreferAnimationControl />
                 </SettingsOption>
             </SectionContainer>
         </PageContainer>
@@ -50,6 +61,20 @@ function ThemeSettingControl() {
                     onClick={handleThemeChange}
                 ></ThemeItem>
             ))}
+        </div>
+    );
+}
+
+function PreferAnimationControl() {
+    const [appSettings, setAppSettings] = useAppSettings();
+
+    const handleToggle = (evt: React.ChangeEvent<HTMLInputElement>) => {
+        setAppSettings({ ...appSettings, preferAnimation: evt.target.checked });
+    };
+
+    return (
+        <div className="float-right">
+            <Toggle checked={appSettings.preferAnimation} onChange={handleToggle} color="primary"/>
         </div>
     );
 }
