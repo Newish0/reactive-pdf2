@@ -52,7 +52,16 @@ const GridDNDBox = ({
 
     const keysHeld = useKeysHeld();
 
-    useEffect(() => setLastSelectedItemId(null), [keysHeld, setLastSelectedItemId]);
+    // Reset last selected item for muli select on release held
+    useEffect(() => {
+        if (!keysHeld["Shift"]) setLastSelectedItemId(null);
+    }, [keysHeld, setLastSelectedItemId]);
+
+    // Reset selection on allowSelection change
+    useEffect(() => {
+        if (!allowSelection)
+            setItems((items) => items.map((item) => ((item.selected = false), item)));
+    }, [allowSelection, setItems]);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
