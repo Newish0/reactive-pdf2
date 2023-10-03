@@ -7,7 +7,7 @@ export const proxyPageToDNDItem = (page: ProxyPage): DNDItem => {
         title: `${page.reference.file.name} ⋅ ${page.reference.page}`,
         content: (
             <img
-                className="object-contain border border-neutral rounded-md"
+                className="object-contain border border-neutral"
                 src={page.thumbnail ?? ""}
             />
         ),

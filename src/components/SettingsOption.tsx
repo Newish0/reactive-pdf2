@@ -1,4 +1,6 @@
-enum Position {
+import { Divider } from "react-daisyui";
+
+export enum SettingsOptionPosition {
     Right,
     Bottom,
 }
@@ -7,7 +9,7 @@ interface SettingsOptionProps extends React.PropsWithChildren {
     title: string;
     description?: string;
     icon: React.ReactElement;
-    position: Position;
+    position: SettingsOptionPosition;
 }
 
 export default function SettingsOption({
@@ -27,14 +29,21 @@ export default function SettingsOption({
                     <p>{description}</p>
                 </div>
 
-                {position === Position.Right && <div className="flex-grow">{children}</div>}
+                {position === SettingsOptionPosition.Right && (
+                    <div className="flex-grow">{children}</div>
+                )}
             </div>
 
-            {position === Position.Bottom && <div className="flex-grow">{children}</div>}
+            {position === SettingsOptionPosition.Bottom && (
+                <>
+                    <Divider />
+                    <div className="flex-grow px-4">{children}</div>
+                </>
+            )}
         </div>
     );
 }
 
 SettingsOption.defaultProps = {
-    position: Position.Right,
+    position: SettingsOptionPosition.Right,
 };
