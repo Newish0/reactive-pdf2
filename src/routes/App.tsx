@@ -13,6 +13,7 @@ import { proxyPageToDNDItem } from "@util/convert";
 import PageContainer from "@components/PageContainer";
 import { useAppSettings } from "@atoms/appsettings";
 import SectionContainer from "@components/SectionContainer";
+import FileDrop from "@components/FileDrop";
 
 export default function App() {
     const [appSettings] = useAppSettings();
@@ -92,24 +93,26 @@ export default function App() {
                 </ControlsBarContext.Provider>
             </SectionContainer>
 
-            <SectionContainer className="flex-shrink h-full overflow-x-hidden overflow-y-auto scrollbar">
-                <GridDNDContext.Provider value={[items, setItems]}>
-                    <GridDNDBox
-                        spacing={24}
-                        gridSize={ctrlBarVals.gridScale}
-                        showFullTitle={false}
-                        allowSelection={ctrlBarVals.selectActive}
-                        end={
-                            <div className="p-4 m-auto h-full">
-                                <PseudoPageInput
-                                    onChange={handleAddFiles}
-                                    accept="application/pdf, image/png, image/jpg, image/jpeg, image/avif, image/webp"
-                                ></PseudoPageInput>
-                            </div>
-                        }
-                    ></GridDNDBox>
-                </GridDNDContext.Provider>
-            </SectionContainer>
+            <FileDrop onDrop={handleAddFiles}>
+                <SectionContainer className="flex-shrink h-full overflow-x-hidden overflow-y-auto scrollbar">
+                    <GridDNDContext.Provider value={[items, setItems]}>
+                        <GridDNDBox
+                            spacing={24}
+                            gridSize={ctrlBarVals.gridScale}
+                            showFullTitle={false}
+                            allowSelection={ctrlBarVals.selectActive}
+                            end={
+                                <div className="p-4 m-auto h-full">
+                                    <PseudoPageInput
+                                        onChange={handleAddFiles}
+                                        accept="application/pdf, image/png, image/jpg, image/jpeg, image/avif, image/webp"
+                                    ></PseudoPageInput>
+                                </div>
+                            }
+                        ></GridDNDBox>
+                    </GridDNDContext.Provider>
+                </SectionContainer>
+            </FileDrop>
 
             <SectionContainer>
                 <Join className="w-full">
