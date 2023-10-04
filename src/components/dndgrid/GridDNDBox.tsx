@@ -193,11 +193,7 @@ const GridDNDBox = ({
                                         </div>
                                     ) : (
                                         <div className="flex justify-center">
-                                            <Tooltip
-                                                message={item.title ?? ""}
-                                                position="bottom"
-                                                className="z-10"
-                                            >
+                                            <Tooltip message={item.title ?? ""} position="bottom">
                                                 <div
                                                     style={{ width: `${gridSize}px` }}
                                                     className="text-center whitespace-nowrap overflow-ellipsis overflow-hidden"

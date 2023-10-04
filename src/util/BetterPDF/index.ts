@@ -3,9 +3,10 @@ import { GetViewportParameters, PDFPageProxy } from "pdfjs-dist/types/src/displa
 
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.js?url";
 import { hashArrayBuffer } from "@util/hash";
-import { PDFNotReadyError } from "./errors";
-import { PDFDocument } from "pdf-lib";
+import { PDFNotReadyError, UnsupportedFileError } from "./errors";
+import { PDFDocument, PDFImage } from "pdf-lib";
 import { copyArrayBuffer } from "@util/io";
+import { convertImageFileToJPG } from "@util/convert";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -21,6 +22,21 @@ export interface ProxyPage {
 }
 
 export default class BetterPDF {
+    /** A list of mime type that are supported */
+    private static SUPPORTED_FORMATS = [
+        "application/pdf",
+        "image/png",
+        "image/jpg",
+        "image/jpeg",
+        "image/webp",
+        "image/avif",
+    ] as const;
+
+    private static DEFAULT_PDF_SIZE = {
+        width: 612, // 8.5 * 72
+        height: 792, // 11 * 72
+    } as const;
+
     private file: File;
     private hash: string;
 
@@ -80,10 +96,67 @@ export default class BetterPDF {
         return this.hash;
     }
 
+    private static isSupportFile(file: File): boolean {
+        const { type } = file;
+        return (BetterPDF.SUPPORTED_FORMATS as unknown as string[]).includes(type);
+    }
+
+    /**
+     * *Assume valid input*
+     * @param file A web image file
+     * @return PDFDocument with a width of BetterPDF.DEFAULT_PDF_SIZE.width and maximum possible height containing the image
+     */
+    private static async createPdfFromImage(file: File) {
+        const pdfDoc = await PDFDocument.create();
+
+        const page = pdfDoc.addPage();
+
+        const imageBytes = copyArrayBuffer(await file.arrayBuffer());
+
+        let image: PDFImage | null = null;
+        if (file.type === "image/png") {
+            image = await pdfDoc.embedPng(imageBytes);
+        } else if (file.type === "image/jpg" || file.type === "image/jpeg") {
+            image = await pdfDoc.embedJpg(imageBytes);
+        } else {
+            image = await pdfDoc.embedJpg(await convertImageFileToJPG(file));
+        }
+
+        const aspectRatio = image.width / image.height;
+
+        const width = BetterPDF.DEFAULT_PDF_SIZE.width;
+        const height = BetterPDF.DEFAULT_PDF_SIZE.width / aspectRatio;
+
+        page.drawImage(image, {
+            x: 0,
+            y: 0,
+            width,
+            height,
+        });
+
+        page.setSize(width, height);
+
+        return pdfDoc;
+    }
+
     /**
      * Load file into buffer
      */
     private async load() {
+        if (!BetterPDF.isSupportFile(this.file))
+            throw new UnsupportedFileError(this.file, BetterPDF.SUPPORTED_FORMATS);
+
+        // Load as image if not pdf
+        if (this.file.type !== "application/pdf") {
+            this.pdfLibDoc = await BetterPDF.createPdfFromImage(this.file);
+            const fileData = await this.pdfLibDoc.save();
+            this.hash = await hashArrayBuffer(fileData);
+            this.pdfJsDoc = await pdfjsLib.getDocument({
+                data: new Uint8Array(copyArrayBuffer(fileData)),
+            }).promise;
+            return;
+        }
+
         const fileData = await this.file.arrayBuffer();
 
         this.hash = await hashArrayBuffer(fileData);
