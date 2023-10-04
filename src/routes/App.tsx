@@ -93,7 +93,7 @@ export default function App() {
                 </ControlsBarContext.Provider>
             </SectionContainer>
 
-            <FileDrop onDrop={handleAddFiles}>
+            <FileDrop onDrop={handleAddFiles} indicateDragOver={true}>
                 <SectionContainer className="flex-shrink h-full overflow-x-hidden overflow-y-auto scrollbar">
                     <GridDNDContext.Provider value={[items, setItems]}>
                         <GridDNDBox
