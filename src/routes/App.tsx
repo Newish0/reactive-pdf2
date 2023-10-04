@@ -103,7 +103,7 @@ export default function App() {
                             <div className="p-4 m-auto h-full">
                                 <PseudoPageInput
                                     onChange={handleAddFiles}
-                                    accept="application/pdf"
+                                    accept="application/pdf, image/png, image/jpg, image/jpeg, image/avif, image/webp"
                                 ></PseudoPageInput>
                             </div>
                         }

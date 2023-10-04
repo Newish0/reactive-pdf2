@@ -5,7 +5,6 @@ export class IndexOutOfBoundsError extends Error {
     }
 }
 
-
 export class PDFNotReadyError extends Error {
     constructor() {
         super("PDF is not ready. Loading is in progress.");
@@ -13,10 +12,20 @@ export class PDFNotReadyError extends Error {
     }
 }
 
-
 export class LengthMismatchError extends Error {
     constructor(expectedLength: number, actualLength: number) {
         super(`Length mismatch. Expected ${expectedLength}, but got ${actualLength}.`);
         this.name = "LengthMismatchError";
+    }
+}
+
+export class UnsupportedFileError extends Error {
+    constructor(file: File, supportedFormats: readonly string[]) {
+        super(
+            `File ${file.name} is not supported. Supported formats are ${supportedFormats.join(
+                ", "
+            )}.`
+        );
+        this.name = "UnsupportedFileError";
     }
 }
