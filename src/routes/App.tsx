@@ -2,7 +2,7 @@ import GridDNDBox, { DNDItem } from "@components/dndgrid/GridDNDBox";
 import PseudoPageInput from "@components/PseudoPageInput";
 import GridDNDContext from "@components/dndgrid/GridDNDContext";
 import BetterPDF, { ProxyPage } from "@util/BetterPDF";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Button, Input, Join } from "react-daisyui";
 
@@ -18,8 +18,6 @@ import FileDrop from "@components/FileDrop";
 export default function App() {
     const [appSettings] = useAppSettings();
 
-    const [pages, setPages] = useState<ProxyPage[]>([]);
-
     const [items, setItems] = useState<DNDItem[]>([]);
 
     const [ctrlBarVals, setCtrlBarVals] = useState<ControlsBarSettings>({
@@ -31,24 +29,27 @@ export default function App() {
 
     const selectedItems = items.filter((item) => item.selected);
 
-    useEffect(() => {
-        setItems(pages.map((p) => proxyPageToDNDItem(p)));
-    }, [pages]);
-
     const handleAddFiles = async (files: FileList | null) => {
         if (!files) return;
 
         for (const f of files) {
             const bPdf = await BetterPDF.open(f);
+
             if (appSettings.preferAnimation) {
-                setPages([
-                    ...pages,
-                    ...(await bPdf.toProxyPages(0.75, (curPage) =>
-                        setPages((pages) => [...pages, curPage])
-                    )),
+                setItems([
+                    ...items,
+                    ...(
+                        await bPdf.toProxyPages(0.75, (page) => [
+                            ...items,
+                            proxyPageToDNDItem(page),
+                        ])
+                    ).map((p) => proxyPageToDNDItem(p)),
                 ]);
             } else {
-                setPages([...pages, ...(await bPdf.toProxyPages(0.75))]);
+                setItems([
+                    ...items,
+                    ...(await bPdf.toProxyPages(0.75)).map((p) => proxyPageToDNDItem(p)),
+                ]);
             }
         }
     };
