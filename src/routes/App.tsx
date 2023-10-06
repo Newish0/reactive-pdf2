@@ -2,7 +2,7 @@ import GridDNDBox, { DNDItem } from "@components/dndgrid/GridDNDBox";
 import PseudoPageInput from "@components/PseudoPageInput";
 import GridDNDContext from "@components/dndgrid/GridDNDContext";
 import BetterPDF, { ProxyPage } from "@util/BetterPDF";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button, Input, Join } from "react-daisyui";
 import { downloadPDF } from "@util/download";
 import ControlsBarContext, { ControlsBarSettings } from "@components/ControlsBarContext";
