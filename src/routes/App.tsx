@@ -36,6 +36,7 @@ export default function App() {
             const bPdf = await BetterPDF.open(f);
 
             if (appSettings.preferAnimation) {
+                // Add items as we get them and readd all when finish.
                 setItems([
                     ...items,
                     ...(
@@ -46,6 +47,7 @@ export default function App() {
                     ).map((p) => proxyPageToDNDItem(p)),
                 ]);
             } else {
+                // Add items after they all load.
                 setItems([
                     ...items,
                     ...(await bPdf.toProxyPages(0.75)).map((p) => proxyPageToDNDItem(p)),
