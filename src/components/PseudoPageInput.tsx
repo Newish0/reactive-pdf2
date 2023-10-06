@@ -3,10 +3,16 @@ import { TbPlus } from "react-icons/tb";
 interface PseudoPageInputProps {
     type: "Letter";
     accept?: string;
+    multiple: boolean;
     onChange?: (files: FileList | null) => void;
 }
 
-export default function PseudoPageInput({ onChange, type, accept }: PseudoPageInputProps) {
+export default function PseudoPageInput({
+    onChange,
+    type,
+    accept,
+    multiple,
+}: PseudoPageInputProps) {
     const changeHandler = (evt: React.ChangeEvent<HTMLInputElement>) => {
         if (onChange) onChange(evt.target.files);
     };
@@ -19,6 +25,7 @@ export default function PseudoPageInput({ onChange, type, accept }: PseudoPageIn
                     type="file"
                     onChange={changeHandler}
                     accept={accept}
+                    multiple={multiple}
                 />
                 <TbPlus className="pointer-events-none absolute text-2xl text-primary group-hover:text-primary-focus group-hover:scale-125 transition-all " />
             </div>
@@ -28,4 +35,5 @@ export default function PseudoPageInput({ onChange, type, accept }: PseudoPageIn
 
 PseudoPageInput.defaultProps = {
     type: "Letter",
+    multiple: false,
 };

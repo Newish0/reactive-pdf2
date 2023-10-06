@@ -3,9 +3,7 @@ import PseudoPageInput from "@components/PseudoPageInput";
 import GridDNDContext from "@components/dndgrid/GridDNDContext";
 import BetterPDF, { ProxyPage } from "@util/BetterPDF";
 import { useEffect, useState } from "react";
-
 import { Button, Input, Join } from "react-daisyui";
-
 import { downloadPDF } from "@util/download";
 import ControlsBarContext, { ControlsBarSettings } from "@components/ControlsBarContext";
 import ControlsBar from "@components/ControlsBar";
@@ -16,14 +14,12 @@ import SectionContainer from "@components/SectionContainer";
 import FileDrop from "@components/FileDrop";
 
 export default function App() {
-    const [appSettings] = useAppSettings();
-
-    const [pages, setPages] = useState<ProxyPage[]>([]);
+    const [appSettings, setAppSettings] = useAppSettings();
 
     const [items, setItems] = useState<DNDItem[]>([]);
 
     const [ctrlBarVals, setCtrlBarVals] = useState<ControlsBarSettings>({
-        gridScale: 160,
+        gridScale: appSettings.gridScale.current,
         selectActive: false,
     });
 
@@ -31,24 +27,20 @@ export default function App() {
 
     const selectedItems = items.filter((item) => item.selected);
 
-    useEffect(() => {
-        setItems(pages.map((p) => proxyPageToDNDItem(p)));
-    }, [pages]);
-
     const handleAddFiles = async (files: FileList | null) => {
         if (!files) return;
 
         for (const f of files) {
             const bPdf = await BetterPDF.open(f);
+
+            // Add items as we get them if prefer animation, else add all when finish.
             if (appSettings.preferAnimation) {
-                setPages([
-                    ...pages,
-                    ...(await bPdf.toProxyPages(0.75, (curPage) =>
-                        setPages((pages) => [...pages, curPage])
-                    )),
-                ]);
+                await bPdf.toProxyPages(0.75, (page) => {
+                    setItems((oldItems) => [...oldItems, proxyPageToDNDItem(page)]);
+                });
             } else {
-                setPages([...pages, ...(await bPdf.toProxyPages(0.75))]);
+                const newItems = (await bPdf.toProxyPages(0.75)).map((p) => proxyPageToDNDItem(p));
+                setItems((oldItems) => [...oldItems, ...newItems]);
             }
         }
     };
@@ -79,6 +71,12 @@ export default function App() {
         setCtrlBarVals((oldVals) => ({ ...oldVals, selectActive: false }));
     };
 
+    // Save grid scale to app settings on change.
+    const handleGridScaleChange = (newScale: number) => {
+        appSettings.gridScale.current = newScale;
+        setAppSettings({ ...appSettings });
+    };
+
     return (
         <PageContainer title="Reactive PDF">
             <SectionContainer className="flex justify-between items-center">
@@ -89,6 +87,7 @@ export default function App() {
                             max: appSettings.gridScale.max,
                         }}
                         onDeleteSelected={selectedItems.length ? handleDeleteSelected : undefined}
+                        onScaleChange={handleGridScaleChange}
                     />
                 </ControlsBarContext.Provider>
             </SectionContainer>
@@ -107,6 +106,7 @@ export default function App() {
                                         <PseudoPageInput
                                             onChange={handleAddFiles}
                                             accept="application/pdf, image/png, image/jpg, image/jpeg, image/avif, image/webp"
+                                            multiple={true}
                                         ></PseudoPageInput>
                                     </div>
                                 }

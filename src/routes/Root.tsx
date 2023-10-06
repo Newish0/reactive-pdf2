@@ -21,7 +21,7 @@ export default function Root() {
         <>
             <div className="w-screen h-screen fixed">
                 <GlobalNav>
-                    <main className="m-2">
+                    <main>
                         <Outlet />
                     </main>
                 </GlobalNav>

@@ -72,7 +72,7 @@ export default function ContextMenu({
 
             {contextMenuOpen && (
                 <div
-                    className="absolute bg-base-200 rounded-box w-56 z-30 transition-opacity"
+                    className="fixed bg-base-200 rounded-box w-56 z-30 transition-opacity"
                     style={{ top: `${anchorPoint.y}px`, left: `${anchorPoint.x}px` }}
                 >
                     {menuItems}

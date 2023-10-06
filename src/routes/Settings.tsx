@@ -131,7 +131,7 @@ function GridScaleControl() {
     };
 
     return (
-        <div className="flex gap-4 justify-end">
+        <div className="flex gap-4 justify-end max-sm:flex-col">
             <div className="flex w-32 component-preview items-center justify-center gap-2 font-sans">
                 <div className="form-control w-full max-w-xs">
                     <label className="label">
