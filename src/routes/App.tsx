@@ -33,23 +33,14 @@ export default function App() {
         for (const f of files) {
             const bPdf = await BetterPDF.open(f);
 
+            // Add items as we get them if prefer animation, else add all when finish.
             if (appSettings.preferAnimation) {
-                // Add items as we get them and readd all when finish.
-                setItems([
-                    ...items,
-                    ...(
-                        await bPdf.toProxyPages(0.75, (page) => [
-                            ...items,
-                            proxyPageToDNDItem(page),
-                        ])
-                    ).map((p) => proxyPageToDNDItem(p)),
-                ]);
+                await bPdf.toProxyPages(0.75, (page) => {
+                    setItems((oldItems) => [...oldItems, proxyPageToDNDItem(page)]);
+                });
             } else {
-                // Add items after they all load.
-                setItems([
-                    ...items,
-                    ...(await bPdf.toProxyPages(0.75)).map((p) => proxyPageToDNDItem(p)),
-                ]);
+                const newItems = (await bPdf.toProxyPages(0.75)).map((p) => proxyPageToDNDItem(p));
+                setItems((oldItems) => [...oldItems, ...newItems]);
             }
         }
     };
@@ -108,6 +99,7 @@ export default function App() {
                                         <PseudoPageInput
                                             onChange={handleAddFiles}
                                             accept="application/pdf, image/png, image/jpg, image/jpeg, image/avif, image/webp"
+                                            multiple={true}
                                         ></PseudoPageInput>
                                     </div>
                                 }
