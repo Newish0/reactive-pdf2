@@ -2,7 +2,7 @@ import GridDNDBox, { DNDItem } from "@components/dndgrid/GridDNDBox";
 import PseudoPageInput from "@components/PseudoPageInput";
 import GridDNDContext from "@components/dndgrid/GridDNDContext";
 import BetterPDF, { ProxyPage } from "@util/BetterPDF";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Input, Join } from "react-daisyui";
 import { downloadPDF } from "@util/download";
 import ControlsBarContext, { ControlsBarSettings } from "@components/ControlsBarContext";
@@ -14,12 +14,12 @@ import SectionContainer from "@components/SectionContainer";
 import FileDrop from "@components/FileDrop";
 
 export default function App() {
-    const [appSettings] = useAppSettings();
+    const [appSettings, setAppSettings] = useAppSettings();
 
     const [items, setItems] = useState<DNDItem[]>([]);
 
     const [ctrlBarVals, setCtrlBarVals] = useState<ControlsBarSettings>({
-        gridScale: 160,
+        gridScale: appSettings.gridScale.current,
         selectActive: false,
     });
 
@@ -71,6 +71,12 @@ export default function App() {
         setCtrlBarVals((oldVals) => ({ ...oldVals, selectActive: false }));
     };
 
+    // Save grid scale to app settings on change.
+    const handleGridScaleChange = (newScale: number) => {
+        appSettings.gridScale.current = newScale;
+        setAppSettings({ ...appSettings });
+    };
+
     return (
         <PageContainer title="Reactive PDF">
             <SectionContainer className="flex justify-between items-center">
@@ -81,6 +87,7 @@ export default function App() {
                             max: appSettings.gridScale.max,
                         }}
                         onDeleteSelected={selectedItems.length ? handleDeleteSelected : undefined}
+                        onScaleChange={handleGridScaleChange}
                     />
                 </ControlsBarContext.Provider>
             </SectionContainer>

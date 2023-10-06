@@ -19,7 +19,7 @@ export default function ThemeItem({ theme, selected, onClick: handleClick }: The
                 if (handleClick) handleClick(theme);
             }}
             className={twMerge(
-                "border border-base-content/20 hover:border-base-content/40 outline-base-content overflow-hidden rounded-md",
+                "w-max border border-base-content/20 hover:border-base-content/40 outline-base-content overflow-hidden rounded-md",
                 selected ? "outline outline-2 outline-primary" : ""
             )}
         >

@@ -1,4 +1,5 @@
 // Import necessary modules
+import { clamp } from "@util/math";
 import { atom, useAtom } from "jotai";
 
 type AppSettings = {
@@ -7,6 +8,7 @@ type AppSettings = {
     gridScale: {
         min: number;
         max: number;
+        current: number;
     };
 };
 
@@ -22,6 +24,7 @@ const getInitialAppSettings = () => {
               gridScale: {
                   min: 100,
                   max: 600,
+                  current: 160,
               },
           };
 
@@ -38,6 +41,13 @@ export const useAppSettings = () => {
 
     // Custom setter function that updates both atom and localStorage
     const setAppSettingsWithLocalStorage = (newSettings: AppSettings) => {
+        // Clamp current grid scale
+        newSettings.gridScale.current = clamp(
+            newSettings.gridScale.current,
+            newSettings.gridScale.min,
+            newSettings.gridScale.max
+        );
+
         setAppSettings(newSettings);
         localStorage.setItem("appSettings", JSON.stringify(newSettings));
     };

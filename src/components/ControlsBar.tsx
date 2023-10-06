@@ -10,13 +10,20 @@ export interface ControlsBarProps {
         max: number;
     };
     onDeleteSelected?: () => void;
+    onScaleChange?: (newScale: number) => void;
 }
 
-export default function ControlsBar({ gridScale, onDeleteSelected }: ControlsBarProps) {
+export default function ControlsBar({
+    gridScale,
+    onDeleteSelected,
+    onScaleChange,
+}: ControlsBarProps) {
     const [controls, setControls] = useContext(ControlsBarContext);
 
     const handleScaleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-        setControls((oldControls) => ({ ...oldControls, gridScale: parseFloat(evt.target.value) }));
+        const newGridScale = parseFloat(evt.target.value);
+        setControls((oldControls) => ({ ...oldControls, gridScale: newGridScale }));
+        if (onScaleChange) onScaleChange(newGridScale);
     };
 
     const handleSelectActive = (active: boolean) => {

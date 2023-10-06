@@ -6,7 +6,7 @@ interface PageContainerProps extends React.PropsWithChildren {
 
 export default function PageContainer({ children, title }: PageContainerProps) {
     return (
-        <section className="px-6 py-8 h-screen w-max-screen">
+        <section className="px-6 py-8 h-screen">
             <div className="flex flex-col space-y-4 h-full">
                 <div className="prose prose-sm md:prose-base">
                     <h1>{title}</h1>
