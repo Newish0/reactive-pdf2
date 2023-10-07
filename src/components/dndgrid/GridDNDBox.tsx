@@ -105,21 +105,17 @@ const GridDNDBox = ({
         item.selected = isSelected;
 
         // Select all items in between two selection if held shift
-        if (keysHeld["Shift"]) {
-            if (lastSelectedItemId) {
-                const lastItemIndex = items.findIndex((item) => item.id === lastSelectedItemId);
-                if (lastItemIndex > -1) {
-                    const startIndex = Math.min(itemIndex, lastItemIndex);
-                    const endIndex = Math.max(itemIndex, lastItemIndex);
-                    for (let i = startIndex; i < endIndex && items[i]; i++) {
-                        items[i].selected = isSelected;
-                    }
+        if (keysHeld["Shift"] && lastSelectedItemId) {
+            const lastItemIndex = items.findIndex((item) => item.id === lastSelectedItemId);
+            if (lastItemIndex > -1) {
+                const startIndex = Math.min(itemIndex, lastItemIndex);
+                const endIndex = Math.max(itemIndex, lastItemIndex);
+                for (let i = startIndex; i <= endIndex && items[i]; i++) {
+                    items[i].selected = isSelected;
                 }
-            } else {
-                setLastSelectedItemId(id);
             }
-        } else {
-            setLastSelectedItemId(null);
+        } else if (!lastSelectedItemId) {
+            setLastSelectedItemId(id);
         }
 
         setItems([...items]); // cause update
