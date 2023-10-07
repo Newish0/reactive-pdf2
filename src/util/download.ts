@@ -1,4 +1,4 @@
-function downloadBytes(bytes: ArrayBuffer, type: string, fileName: string) {
+export function downloadBytes(bytes: ArrayBuffer, type: string, fileName: string) {
     const blob = new Blob([bytes], { type });
     const link = document.createElement("a");
     link.href = window.URL.createObjectURL(blob);

@@ -10,10 +10,10 @@ import {
     useSensors,
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
-import { useContext, useEffect, useState } from "react";
+import { ReactElement, useContext, useEffect, useState } from "react";
 import GridContainer from "./GridContainer";
 import GridItem from "./GridItem";
-import { Badge, Indicator, Stack, Tooltip } from "react-daisyui";
+import { Badge, Indicator, Menu, Stack, Tooltip } from "react-daisyui";
 import { twMerge } from "tailwind-merge";
 import GridDNDContext from "./GridDNDContext";
 import { useKeysHeld } from "@hooks/input";
@@ -25,6 +25,9 @@ export interface DNDItem {
     content: React.ReactNode;
     selected: boolean;
     title?: string;
+    additionalMenuItems?:
+        | ReactElement<typeof Menu | typeof Menu.Item>
+        | Array<ReactElement<typeof Menu | typeof Menu.Item>>;
     [key: string]: unknown;
 }
 
@@ -105,21 +108,17 @@ const GridDNDBox = ({
         item.selected = isSelected;
 
         // Select all items in between two selection if held shift
-        if (keysHeld["Shift"]) {
-            if (lastSelectedItemId) {
-                const lastItemIndex = items.findIndex((item) => item.id === lastSelectedItemId);
-                if (lastItemIndex > -1) {
-                    const startIndex = Math.min(itemIndex, lastItemIndex);
-                    const endIndex = Math.max(itemIndex, lastItemIndex);
-                    for (let i = startIndex; i < endIndex && items[i]; i++) {
-                        items[i].selected = isSelected;
-                    }
+        if (keysHeld["Shift"] && lastSelectedItemId) {
+            const lastItemIndex = items.findIndex((item) => item.id === lastSelectedItemId);
+            if (lastItemIndex > -1) {
+                const startIndex = Math.min(itemIndex, lastItemIndex);
+                const endIndex = Math.max(itemIndex, lastItemIndex);
+                for (let i = startIndex; i <= endIndex && items[i]; i++) {
+                    items[i].selected = isSelected;
                 }
-            } else {
-                setLastSelectedItemId(id);
             }
-        } else {
-            setLastSelectedItemId(null);
+        } else if (!lastSelectedItemId) {
+            setLastSelectedItemId(id);
         }
 
         setItems([...items]); // cause update
@@ -131,12 +130,6 @@ const GridDNDBox = ({
             if (index > -1) items.splice(index, 1);
             return [...items];
         });
-    };
-
-    const handleExportItemAsImage = (item: DNDItem) => {
-        console.log(item);
-        // TODO: Change GridItemMenu to accept an object that allows user to extend functionalities.
-        // i.e. the export page as image is be an function extended on this generalized dnd context menu
     };
 
     const sensors = useSensors(
@@ -171,7 +164,7 @@ const GridDNDBox = ({
                             menuItems={
                                 <GridItemMenu
                                     onDelete={() => handleDeleteItem(item)}
-                                    onExportPageAsImage={() => handleExportItemAsImage(item)}
+                                    additionalItems={item.additionalMenuItems}
                                 />
                             }
                         >
