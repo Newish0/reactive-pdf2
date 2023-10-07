@@ -21,6 +21,8 @@ export interface ProxyPage {
     };
 }
 
+type RenderImageType = "image/png" | "image/jpg" | "image/webp";
+
 export default class BetterPDF {
     /** A list of mime type that are supported */
     private static SUPPORTED_FORMATS = [
@@ -90,6 +92,12 @@ export default class BetterPDF {
         }
 
         return proxyPages;
+    }
+
+    public async pageToImage(pageNumber: number, scale = 2, type: RenderImageType = "image/webp") {
+        if (!this.pdfJsDoc) throw new PDFNotReadyError();
+        const page = await this.pdfJsDoc.getPage(pageNumber);
+        return await BetterPDF.renderPage(page, { scale }, type);
     }
 
     public getHash() {
@@ -177,7 +185,8 @@ export default class BetterPDF {
      */
     private static async renderPage(
         page: PDFPageProxy,
-        params: GetViewportParameters = { scale: 1 }
+        params: GetViewportParameters = { scale: 1 },
+        type: RenderImageType = "image/png"
     ) {
         const viewport = page.getViewport(params);
         const outputScale = window.devicePixelRatio || 1;
@@ -203,7 +212,7 @@ export default class BetterPDF {
         };
         await page.render(renderContext).promise;
 
-        return tmpCanvas.toDataURL();
+        return tmpCanvas.toDataURL(type);
     }
 
     /**

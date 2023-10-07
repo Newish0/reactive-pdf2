@@ -3,15 +3,16 @@ import PseudoPageInput from "@components/PseudoPageInput";
 import GridDNDContext from "@components/dndgrid/GridDNDContext";
 import BetterPDF, { ProxyPage } from "@util/BetterPDF";
 import { useState } from "react";
-import { Button, Input, Join } from "react-daisyui";
-import { downloadPDF } from "@util/download";
+import { Button, Input, Join, Menu } from "react-daisyui";
+import { downloadPDF, downloadBytes } from "@util/download";
 import ControlsBarContext, { ControlsBarSettings } from "@components/ControlsBarContext";
 import ControlsBar from "@components/ControlsBar";
-import { proxyPageToDNDItem } from "@util/convert";
+import { base64ToArrayBuffer, extractBinFromBase64, proxyPageToDNDItem } from "@util/convert";
 import PageContainer from "@components/PageContainer";
 import { useAppSettings } from "@atoms/appsettings";
 import SectionContainer from "@components/SectionContainer";
 import FileDrop from "@components/FileDrop";
+import { TbPhotoDown } from "react-icons/tb";
 
 export default function App() {
     const [appSettings, setAppSettings] = useAppSettings();
@@ -76,6 +77,37 @@ export default function App() {
         appSettings.gridScale.current = newScale;
         setAppSettings({ ...appSettings });
     };
+
+    // Add context menu to items
+    items.forEach((item) => {
+        const handleExportItemAsImage = async (item: DNDItem) => {
+            const extension = "webp";
+            const type = "image/webp";
+            const proxyPage = item.page as ProxyPage;
+            const b64Img = await proxyPage.reference.betterPdf.pageToImage(
+                proxyPage.reference.page,
+                5
+            );
+
+            if (!b64Img) return;
+
+            downloadBytes(
+                base64ToArrayBuffer(extractBinFromBase64(b64Img)),
+                type,
+                `${proxyPage.reference.file.name} - ${proxyPage.reference.page}.${extension}`
+            );
+        };
+
+        item.additionalMenuItems = (
+            <>
+                <Menu.Item onClickCapture={() => handleExportItemAsImage(item)}>
+                    <span>
+                        <TbPhotoDown /> Export page as image
+                    </span>
+                </Menu.Item>
+            </>
+        );
+    });
 
     return (
         <PageContainer title="Reactive PDF">

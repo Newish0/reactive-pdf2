@@ -56,3 +56,11 @@ export function convertImageFileToJPG(file: File, quality = 0.9) {
         };
     });
 }
+
+export function extractBinFromBase64(base64URI: string): string {
+    return base64URI.split(",").at(-1)?.trim() ?? "";
+}
+
+export function base64ToArrayBuffer(base64: string): ArrayBuffer {
+    return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+}
