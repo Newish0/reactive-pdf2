@@ -12,6 +12,9 @@ type AppSettings = {
     };
 };
 
+const GRID_MIN = Math.max(100, Math.round(window.innerWidth * 0.05));
+const GRID_MAX = Math.min(600, Math.round(window.innerWidth * 0.66));
+
 const getInitialAppSettings = () => {
     // Retrieve app settings from local storage or use default values
     const settingsJSON = localStorage.getItem("appSettings");
@@ -22,9 +25,9 @@ const getInitialAppSettings = () => {
               theme: "night",
               preferAnimation: false,
               gridScale: {
-                  min: 100,
-                  max: 600,
-                  current: 160,
+                  min: GRID_MIN,
+                  max: GRID_MAX,
+                  current: (GRID_MAX - GRID_MIN) / 2,
               },
           };
 
