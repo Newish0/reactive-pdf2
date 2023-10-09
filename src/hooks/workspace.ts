@@ -49,5 +49,6 @@ export function useWorkspace(id: string) {
         setWorkspaceName,
         exportFileName,
         setExportFileName,
+        ready,
     } as const;
 }
