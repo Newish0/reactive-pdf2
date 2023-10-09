@@ -3,7 +3,7 @@ import PseudoPageInput from "@components/PseudoPageInput";
 import GridDNDContext from "@components/dndgrid/GridDNDContext";
 import BetterPDF, { ProxyPage } from "@util/BetterPDF";
 import { Dispatch, SetStateAction, useState } from "react";
-import { Button, Input, Join, Menu } from "react-daisyui";
+import { Button, Input, Join, Loading, Menu } from "react-daisyui";
 import { downloadPDF, downloadBytes } from "@util/download";
 import ControlsBarContext, { ControlsBarSettings } from "@components/ControlsBarContext";
 import ControlsBar from "@components/ControlsBar";
@@ -23,7 +23,8 @@ import { useWorkspace } from "@hooks/workspace";
 export default function App() {
     const [appSettings, setAppSettings] = useAppSettings();
 
-    const { items, setItems, exportFileName, setExportFileName } = useWorkspace("tmp-workspace");
+    const { items, setItems, exportFileName, setExportFileName, ready } =
+        useWorkspace("tmp-workspace");
 
     const [ctrlBarVals, setCtrlBarVals] = useState<ControlsBarSettings>({
         gridScale: appSettings.gridScale.current,
@@ -156,29 +157,35 @@ export default function App() {
             </SectionContainer>
 
             <section className="flex-shrink h-max-full overflow-x-hidden overflow-y-auto scrollbar">
-                <FileDrop onDrop={handleAddFiles} indicateDragOver={true}>
-                    <SectionContainer>
-                        <GridDNDContext.Provider
-                            value={[items, setItems as Dispatch<SetStateAction<DNDItem[]>>]}
-                        >
-                            <GridDNDBox
-                                spacing={24}
-                                gridSize={ctrlBarVals.gridScale}
-                                showFullTitle={false}
-                                allowSelection={ctrlBarVals.selectActive}
-                                end={
-                                    <div className="p-4 m-auto h-full">
-                                        <PseudoPageInput
-                                            onChange={handleAddFiles}
-                                            accept="application/pdf, image/png, image/jpg, image/jpeg, image/avif, image/webp"
-                                            multiple={true}
-                                        ></PseudoPageInput>
-                                    </div>
-                                }
-                            ></GridDNDBox>
-                        </GridDNDContext.Provider>
+                {ready ? (
+                    <FileDrop onDrop={handleAddFiles} indicateDragOver={true}>
+                        <SectionContainer>
+                            <GridDNDContext.Provider
+                                value={[items, setItems as Dispatch<SetStateAction<DNDItem[]>>]}
+                            >
+                                <GridDNDBox
+                                    spacing={24}
+                                    gridSize={ctrlBarVals.gridScale}
+                                    showFullTitle={false}
+                                    allowSelection={ctrlBarVals.selectActive}
+                                    end={
+                                        <div className="p-4 m-auto h-full">
+                                            <PseudoPageInput
+                                                onChange={handleAddFiles}
+                                                accept="application/pdf, image/png, image/jpg, image/jpeg, image/avif, image/webp"
+                                                multiple={true}
+                                            ></PseudoPageInput>
+                                        </div>
+                                    }
+                                ></GridDNDBox>
+                            </GridDNDContext.Provider>
+                        </SectionContainer>
+                    </FileDrop>
+                ) : (
+                    <SectionContainer className="flex justify-center align-middle py-24">
+                        <Loading variant="spinner" size="lg" />
                     </SectionContainer>
-                </FileDrop>
+                )}
             </section>
 
             <SectionContainer>
