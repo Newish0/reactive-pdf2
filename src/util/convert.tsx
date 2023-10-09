@@ -1,4 +1,4 @@
-import { ExtendedDNDItem } from "@hooks/workspace";
+import { ExtendedDNDItem } from "@type/workspace";
 import { ProxyPage } from "./BetterPDF";
 
 export const proxyPageToExtendedDNDItem = (page: ProxyPage): ExtendedDNDItem => {
