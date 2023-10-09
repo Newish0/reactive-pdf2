@@ -50,8 +50,15 @@ export default class Workspace {
         }
     }
 
-    public static async fileIsInuse(hash: string) {
-        for (const [, ws] of Workspace.store) {
+    /**
+     *
+     * @param hash
+     * @param exclude list of workspace ids
+     * @returns
+     */
+    public static async fileIsInuse(hash: string, exclude?: string[]) {
+        for (const [id, ws] of Workspace.store) {
+            if (exclude?.includes(id)) continue;
             if ((await ws.getFileHashList()).includes(hash)) return true;
         }
 
@@ -88,7 +95,7 @@ export default class Workspace {
 
         if (!fileHashList.includes(hash)) return null;
         const file = await localforage.getItem<File>(Workspace.DB_PATH.file(hash));
-        if (await Workspace.fileIsInuse(hash)) {
+        if (await Workspace.fileIsInuse(hash, [this.id])) {
             return file;
         } else {
             fileHashList.splice(
@@ -131,12 +138,9 @@ export default class Workspace {
 
         for (const hash of fileHashList) {
             const file = await this.getFile(hash);
-            console.log("file", file);
             if (!file) continue;
             proxyPagesMap.set(hash, await (await BetterPDF.open(file)).toProxyPages(0.75));
         }
-
-        console.log("MAP", proxyPagesMap);
 
         for (const minItem of minItems) {
             const proxyPages = proxyPagesMap.get(minItem.fileHash);
