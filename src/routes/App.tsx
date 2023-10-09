@@ -2,30 +2,33 @@ import GridDNDBox, { DNDItem } from "@components/dndgrid/GridDNDBox";
 import PseudoPageInput from "@components/PseudoPageInput";
 import GridDNDContext from "@components/dndgrid/GridDNDContext";
 import BetterPDF, { ProxyPage } from "@util/BetterPDF";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Button, Input, Join, Menu } from "react-daisyui";
 import { downloadPDF, downloadBytes } from "@util/download";
 import ControlsBarContext, { ControlsBarSettings } from "@components/ControlsBarContext";
 import ControlsBar from "@components/ControlsBar";
-import { base64ToArrayBuffer, extractBinFromBase64, proxyPageToDNDItem } from "@util/convert";
+import {
+    base64ToArrayBuffer,
+    extractBinFromBase64,
+    proxyPageToExtendedDNDItem,
+} from "@util/convert";
 import PageContainer from "@components/PageContainer";
 import { useAppSettings } from "@atoms/appsettings";
 import SectionContainer from "@components/SectionContainer";
 import FileDrop from "@components/FileDrop";
 import { TbFilePlus, TbPhotoDown } from "react-icons/tb";
 import { openFilePicker } from "@util/io";
+import { useWorkspace } from "@hooks/workspace";
 
 export default function App() {
     const [appSettings, setAppSettings] = useAppSettings();
 
-    const [items, setItems] = useState<DNDItem[]>([]);
+    const { items, setItems, exportFileName, setExportFileName } = useWorkspace("tmp-workspace");
 
     const [ctrlBarVals, setCtrlBarVals] = useState<ControlsBarSettings>({
         gridScale: appSettings.gridScale.current,
         selectActive: false,
     });
-
-    const [exportFileName, setExportFileName] = useState<string>("reactive-pdf-export.pdf");
 
     const selectedItems = items.filter((item) => item.selected);
 
@@ -41,11 +44,13 @@ export default function App() {
                     setItems((oldItems) => {
                         const index =
                             atIndex !== undefined ? atIndex + pageNumber - 1 : oldItems.length;
-                        return oldItems.toSpliced(index, 0, proxyPageToDNDItem(page));
+                        return oldItems.toSpliced(index, 0, proxyPageToExtendedDNDItem(page));
                     });
                 });
             } else {
-                const newItems = (await bPdf.toProxyPages(0.75)).map((p) => proxyPageToDNDItem(p));
+                const newItems = (await bPdf.toProxyPages(0.75)).map((p) =>
+                    proxyPageToExtendedDNDItem(p)
+                );
                 setItems((oldItems) => {
                     return [
                         ...oldItems.slice(0, atIndex ?? oldItems.length),
@@ -153,7 +158,9 @@ export default function App() {
             <section className="flex-shrink h-max-full overflow-x-hidden overflow-y-auto scrollbar">
                 <FileDrop onDrop={handleAddFiles} indicateDragOver={true}>
                     <SectionContainer>
-                        <GridDNDContext.Provider value={[items, setItems]}>
+                        <GridDNDContext.Provider
+                            value={[items, setItems as Dispatch<SetStateAction<DNDItem[]>>]}
+                        >
                             <GridDNDBox
                                 spacing={24}
                                 gridSize={ctrlBarVals.gridScale}

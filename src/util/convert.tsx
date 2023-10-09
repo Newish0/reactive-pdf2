@@ -1,7 +1,7 @@
-import { DNDItem } from "@components/dndgrid/GridDNDBox";
+import { ExtendedDNDItem } from "@hooks/workspace";
 import { ProxyPage } from "./BetterPDF";
 
-export const proxyPageToDNDItem = (page: ProxyPage): DNDItem => {
+export const proxyPageToExtendedDNDItem = (page: ProxyPage): ExtendedDNDItem => {
     return {
         id: `${page.reference.hash}-${page.reference.page}`,
         title: `${page.reference.file.name} ⋅ ${page.reference.page}`,
