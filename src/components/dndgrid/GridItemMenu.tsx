@@ -11,15 +11,18 @@ interface GridItemMenuProps {
 
 export default function GridItemMenu({
     onDelete: handleDelete,
+
     additionalItems,
 }: GridItemMenuProps) {
     return (
         <Menu>
-            <Menu.Item onClickCapture={handleDelete}>
-                <span>
-                    <TbFileX /> Delete
-                </span>
-            </Menu.Item>
+            {handleDelete && (
+                <Menu.Item onClickCapture={handleDelete}>
+                    <span>
+                        <TbFileX /> Delete
+                    </span>
+                </Menu.Item>
+            )}
 
             {additionalItems}
         </Menu>
