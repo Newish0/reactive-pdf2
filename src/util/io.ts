@@ -9,14 +9,23 @@ export function copyArrayBuffer(source: ArrayBuffer) {
     return destination;
 }
 
+type FilePickerOptions = {
+    multiple?: boolean;
+    accept?: string;
+};
+
 /**
  * Programmatically trigger the file picker window (by clicking an invisible `input` element).
  * @returns A list of files picked by the user
  */
-export function openFilePicker(): Promise<FileList> {
+export function openFilePicker({
+    multiple = false,
+    accept = "*",
+}: FilePickerOptions = {}): Promise<FileList> {
     const input = document.createElement("input");
     input.type = "file";
-    input.multiple = true;
+    input.multiple = multiple;
+    input.accept = accept;
     input.click();
 
     return new Promise<FileList>((resolve, reject) => {

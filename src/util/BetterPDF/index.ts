@@ -28,7 +28,7 @@ type RenderImageType = "image/png" | "image/jpg" | "image/webp";
  */
 export default class BetterPDF {
     /** A list of mime type that are supported */
-    private static SUPPORTED_FORMATS = [
+    public static SUPPORTED_FORMATS = [
         "application/pdf",
         "image/png",
         "image/jpg",
@@ -135,9 +135,9 @@ export default class BetterPDF {
     }
 
     /**
-     * Check if a file can be opened by BetterPDF. 
-     * @param file 
-     * @returns 
+     * Check if a file can be opened by BetterPDF.
+     * @param file
+     * @returns
      */
     private static isSupportFile(file: File): boolean {
         const { type } = file;
