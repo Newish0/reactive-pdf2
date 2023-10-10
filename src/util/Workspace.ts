@@ -17,24 +17,32 @@ type WorkspaceInfo = {
     exportFileName: string;
 };
 
+/**
+ * Represents a workspace (an instance of the app and its data).
+ * Handles interacting to DB to allow persistency.
+ */
 export default class Workspace {
-    private static DB_PATH = {
-        // Shared across workspaces
+    /** Functions for getting DB keys */
+    private static DB_KEY = {
+        /** DB key for a file; shared across workspaces */
         file: (hash: string) => `_file-${hash}`,
 
-        // Contains index of all workspaces
+        /**  DB key for list of all workspace ids */
         workspaceIndex: () => "_workspace/index",
 
-        // Specific for work spaces
+        /** DB key for list of file hashes this workspace uses ;specific to each workspace */
         workspaceFilesIndex: (id: string) => `_workspace/${id}/files_index`,
+
+        /** DB key for list of items this workspace uses ;specific to each workspace */
         workspaceItems: (id: string) => `_workspace/${id}/items`,
+
+        /** DB key for info & user config of this workspace;specific to each workspace */
         workspaceInfo: (id: string) => `_workspace/${id}/info`,
     } as const;
 
     private static store = new Map<string, Workspace>();
 
     private id: string;
-    // private fileHashList: string[];
 
     public static async get(id: string) {
         let ws = Workspace.store.get(id);
@@ -47,7 +55,7 @@ export default class Workspace {
     }
 
     public static async restore() {
-        const wsIndex = await localforage.getItem<string[]>(Workspace.DB_PATH.workspaceIndex());
+        const wsIndex = await localforage.getItem<string[]>(Workspace.DB_KEY.workspaceIndex());
 
         if (!wsIndex) return;
 
@@ -77,7 +85,7 @@ export default class Workspace {
 
     private async getFileHashList() {
         const fileIndex = await localforage.getItem<string[]>(
-            Workspace.DB_PATH.workspaceFilesIndex(this.id)
+            Workspace.DB_KEY.workspaceFilesIndex(this.id)
         );
 
         return fileIndex ?? [];
@@ -85,7 +93,7 @@ export default class Workspace {
 
     private async setFileHashList(fileHashList: string[]) {
         await localforage.setItem<string[]>(
-            Workspace.DB_PATH.workspaceFilesIndex(this.id),
+            Workspace.DB_KEY.workspaceFilesIndex(this.id),
             fileHashList
         );
     }
@@ -93,14 +101,14 @@ export default class Workspace {
     private async getFile(hash: string) {
         if (!(await this.getFileHashList()).includes(hash)) return null;
 
-        return await localforage.getItem<File>(Workspace.DB_PATH.file(hash));
+        return await localforage.getItem<File>(Workspace.DB_KEY.file(hash));
     }
 
     private async deleteFile(hash: string) {
         const fileHashList = await this.getFileHashList();
 
         if (!fileHashList.includes(hash)) return null;
-        const file = await localforage.getItem<File>(Workspace.DB_PATH.file(hash));
+        const file = await localforage.getItem<File>(Workspace.DB_KEY.file(hash));
         if (await Workspace.fileIsInuse(hash, [this.id])) {
             return file;
         } else {
@@ -111,7 +119,7 @@ export default class Workspace {
 
             await this.setFileHashList(fileHashList);
 
-            await localforage.removeItem(Workspace.DB_PATH.file(hash));
+            await localforage.removeItem(Workspace.DB_KEY.file(hash));
             return file;
         }
     }
@@ -121,12 +129,12 @@ export default class Workspace {
 
         if (!hash) hash = await hashArrayBuffer(await file.arrayBuffer());
         if (fileHashList.includes(hash))
-            return await localforage.getItem<File>(Workspace.DB_PATH.file(hash));
+            return await localforage.getItem<File>(Workspace.DB_KEY.file(hash));
 
         fileHashList.push(hash);
         await this.setFileHashList(fileHashList);
 
-        return await localforage.setItem<File>(Workspace.DB_PATH.file(hash), file);
+        return await localforage.setItem<File>(Workspace.DB_KEY.file(hash), file);
     }
 
     public async getItems(): Promise<ExtendedDNDItem[]> {
@@ -135,7 +143,7 @@ export default class Workspace {
         const dndItems: ExtendedDNDItem[] = [];
 
         const minItems = await localforage.getItem<MinimalDNDItem[]>(
-            Workspace.DB_PATH.workspaceItems(this.id)
+            Workspace.DB_KEY.workspaceItems(this.id)
         );
 
         if (!minItems) return dndItems;
@@ -185,7 +193,7 @@ export default class Workspace {
 
         // Save to DB
         await localforage.setItem<MinimalDNDItem[]>(
-            Workspace.DB_PATH.workspaceItems(this.id),
+            Workspace.DB_KEY.workspaceItems(this.id),
             minItems
         );
 
@@ -198,13 +206,13 @@ export default class Workspace {
 
     public async setInfo(info: WorkspaceInfo) {
         return await localforage.setItem<WorkspaceInfo>(
-            Workspace.DB_PATH.workspaceInfo(this.id),
+            Workspace.DB_KEY.workspaceInfo(this.id),
             info
         );
     }
 
     public async getInfo() {
-        return await localforage.getItem<WorkspaceInfo>(Workspace.DB_PATH.workspaceInfo(this.id));
+        return await localforage.getItem<WorkspaceInfo>(Workspace.DB_KEY.workspaceInfo(this.id));
     }
 }
 
