@@ -12,6 +12,11 @@ export type MinimalDNDItem = {
     dndIndex: number;
 };
 
+type WorkspaceInfo = {
+    name: string;
+    exportFileName: string;
+};
+
 export default class Workspace {
     private static DB_PATH = {
         // Shared across workspaces
@@ -23,6 +28,7 @@ export default class Workspace {
         // Specific for work spaces
         workspaceFilesIndex: (id: string) => `_workspace/${id}/files_index`,
         workspaceItems: (id: string) => `_workspace/${id}/items`,
+        workspaceInfo: (id: string) => `_workspace/${id}/info`,
     } as const;
 
     private static store = new Map<string, Workspace>();
@@ -188,6 +194,17 @@ export default class Workspace {
         for (const savedHash of fileHashList) {
             if (!inUseFileHashes.includes(savedHash)) this.deleteFile(savedHash);
         }
+    }
+
+    public async setInfo(info: WorkspaceInfo) {
+        return await localforage.setItem<WorkspaceInfo>(
+            Workspace.DB_PATH.workspaceInfo(this.id),
+            info
+        );
+    }
+
+    public async getInfo() {
+        return await localforage.getItem<WorkspaceInfo>(Workspace.DB_PATH.workspaceInfo(this.id));
     }
 }
 
