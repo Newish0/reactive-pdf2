@@ -4,14 +4,14 @@ import { twMerge } from "tailwind-merge";
 
 export default function GlobalNav({ children }: React.PropsWithChildren) {
     return (
-        <div className="drawer lg:drawer-open">
+        <div className="drawer drawer-end lg:drawer-open">
             <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
             <div className="drawer-content">
                 <div className="m-0">{children}</div>
 
                 <label
                     htmlFor="my-drawer-2"
-                    className="btn btn-primary btn-square absolute bottom-0  m-2 drawer-button lg:hidden"
+                    className="btn btn-primary btn-square absolute right-0 top-0 m-6 drawer-button lg:hidden"
                 >
                     <TbLayoutSidebarLeftExpand className="text-2xl" />
                 </label>
