@@ -35,6 +35,7 @@ export default class BetterPDF {
         "image/jpeg",
         "image/webp",
         "image/avif",
+        "image/tiff",
     ] as const;
 
     private static DEFAULT_PDF_SIZE = {
