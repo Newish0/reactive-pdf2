@@ -23,6 +23,9 @@ export interface ProxyPage {
 
 type RenderImageType = "image/png" | "image/jpg" | "image/webp";
 
+/**
+ * An abstraction on pdfjs & pdf-lib to help with loading, displaying, and manipulating PDF.
+ */
 export default class BetterPDF {
     /** A list of mime type that are supported */
     private static SUPPORTED_FORMATS = [
@@ -46,12 +49,22 @@ export default class BetterPDF {
 
     private pdfLibDoc: PDFDocument | null;
 
+    /**
+     * Creates an instance of Better PDF from a file.
+     * @param file a PDF file or an supported image (see `BetterPDF.SUPPORTED_FORMATS`).
+     * @returns
+     */
     public static async open(file: File) {
         const bPdf = new BetterPDF(file);
         await bPdf.load();
         return bPdf;
     }
 
+    /**
+     * **NOTE**: Should only be used within this class. Other instantiation of BetterPDF
+     *       shall be done through `open()`.
+     * @param file
+     */
     private constructor(file: File) {
         this.file = file;
         this.pdfJsDoc = null;
@@ -59,6 +72,12 @@ export default class BetterPDF {
         this.hash = "";
     }
 
+    /**
+     * Get all pages on this PDF as ProxyPages
+     * @param scale The scale to render the thumbnail at
+     * @param progressCallback Callback for i.e. updating the progress UI
+     * @returns
+     */
     public async toProxyPages(
         scale = 0.25,
         progressCallback?: (newPage: ProxyPage, current: number, total: number) => void
@@ -94,23 +113,39 @@ export default class BetterPDF {
         return proxyPages;
     }
 
+    /**
+     * Returns the specified page as an image.
+     * @param pageNumber The target page
+     * @param scale The resolution/scale of the image
+     * @param type The desired format of the return image
+     * @returns Base64 URI of the image
+     */
     public async pageToImage(pageNumber: number, scale = 2, type: RenderImageType = "image/webp") {
         if (!this.pdfJsDoc) throw new PDFNotReadyError();
         const page = await this.pdfJsDoc.getPage(pageNumber);
         return await BetterPDF.renderPage(page, { scale }, type);
     }
 
+    /**
+     * Returns the hash of the file that created this PDF.
+     * @returns
+     */
     public getHash() {
         return this.hash;
     }
 
+    /**
+     * Check if a file can be opened by BetterPDF. 
+     * @param file 
+     * @returns 
+     */
     private static isSupportFile(file: File): boolean {
         const { type } = file;
         return (BetterPDF.SUPPORTED_FORMATS as unknown as string[]).includes(type);
     }
 
     /**
-     * *Assume valid input*
+     * *Assume **valid** input*
      * @param file A web image file
      * @return PDFDocument with a width of BetterPDF.DEFAULT_PDF_SIZE.width and maximum possible height containing the image
      */
