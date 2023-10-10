@@ -117,7 +117,10 @@ export default function App() {
 
         const handleInsertPageHere = async (item: DNDItem) => {
             try {
-                const fileList = await openFilePicker();
+                const fileList = await openFilePicker({
+                    accept: BetterPDF.SUPPORTED_FORMATS.join(","),
+                    multiple: true,
+                });
                 handleAddFiles(fileList, items.findIndex((someItem) => someItem === item) + 1);
             } catch (error) {
                 console.error(error);
@@ -172,7 +175,7 @@ export default function App() {
                                         <div className="p-4 m-auto h-full">
                                             <PseudoPageInput
                                                 onChange={handleAddFiles}
-                                                accept="application/pdf, image/png, image/jpg, image/jpeg, image/avif, image/webp"
+                                                accept={BetterPDF.SUPPORTED_FORMATS.join(",")}
                                                 multiple={true}
                                             ></PseudoPageInput>
                                         </div>
