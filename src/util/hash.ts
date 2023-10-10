@@ -1,3 +1,8 @@
+/**
+ * Get the hash of an array buffer
+ * @param arrayBuffer
+ * @returns the hash of the buffer
+ */
 export async function hashArrayBuffer(arrayBuffer: ArrayBuffer): Promise<string> {
     // Import the subtle crypto functions
     const subtle = window.crypto.subtle;

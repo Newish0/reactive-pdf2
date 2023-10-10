@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 
+/**
+ * A React hook for monitoring which keys are being held.
+ */
 export function useKeysHeld() {
     const [heldKeys, setHeldKeys] = useState<Record<string, boolean>>({});
 
