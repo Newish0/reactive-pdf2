@@ -18,7 +18,7 @@ type WorkspaceInfo = {
 };
 
 /**
- * Represents a workspace (an instance of the app and its data).
+ * A workspace contains the basic data and functions for a instance of the PDF rearranging app.
  * Handles interacting to DB to allow persistency.
  */
 export default class Workspace {

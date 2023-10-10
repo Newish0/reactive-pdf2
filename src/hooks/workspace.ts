@@ -4,7 +4,7 @@ import Workspace from "@util/Workspace";
 import { ExtendedDNDItem } from "@type/workspace";
 
 /**
- * A workspace contains the basic data and functions for a instance of the PDF rearranging app.
+ * A React hook that simplifies the usage of a `Workspace`.
  */
 export function useWorkspace(id: string) {
     const [ready, setReady] = useState(false);
