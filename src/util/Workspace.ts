@@ -17,6 +17,11 @@ type WorkspaceInfo = {
     exportFileName: string;
 };
 
+type WorkspaceMetadata = {
+    createdAt: Date;
+    modifiedAt: Date;
+};
+
 /**
  * A workspace contains the basic data and functions for a instance of the PDF rearranging app.
  * Handles interacting to DB to allow persistency.
@@ -38,6 +43,9 @@ export default class Workspace {
 
         /** DB key for info & user config of this workspace;specific to each workspace */
         workspaceInfo: (id: string) => `_workspace/${id}/info`,
+
+        /** DB key for metadata of this workspace;specific to each workspace */
+        workspaceMetadata: (id: string) => `_workspace/${id}/metadata`,
     } as const;
 
     /** Contains all workspaces */
@@ -45,6 +53,14 @@ export default class Workspace {
 
     /** ID of the current workspace */
     private id: string;
+
+    /**
+     * See all available workspaces.
+     * @returns a list of all workspaces.
+     */
+    public static async getAll() {
+        return Array.from(Workspace.store.values());
+    }
 
     /**
      * Returns the workspace of the specified ID. Used for instantiating a `Workspace`.
@@ -57,6 +73,7 @@ export default class Workspace {
         if (ws) return ws;
 
         ws = new Workspace(id);
+        ws.setMetadata();
         Workspace.store.set(id, ws);
         return ws;
     }
@@ -178,6 +195,14 @@ export default class Workspace {
     }
 
     /**
+     * Retrieve the id of this workspace.
+     * @returns id of the current workspace
+     */
+    public getID() {
+        return this.id;
+    }
+
+    /**
      * Get the list of items from DB
      * @returns List of ExtendedDNDItem as a promise
      */
@@ -247,6 +272,8 @@ export default class Workspace {
             minItems
         );
 
+        this.updateLastModified();
+
         // Cleanup
         const inUseFileHashes = Object.keys(itemFileHashObj);
         for (const savedHash of fileHashList) {
@@ -260,10 +287,12 @@ export default class Workspace {
      * @returns
      */
     public async setInfo(info: WorkspaceInfo) {
-        return await localforage.setItem<WorkspaceInfo>(
+        const newInfo = await localforage.setItem<WorkspaceInfo>(
             Workspace.DB_KEY.workspaceInfo(this.id),
             info
         );
+        this.updateLastModified();
+        return newInfo;
     }
 
     /**
@@ -272,6 +301,43 @@ export default class Workspace {
      */
     public async getInfo() {
         return await localforage.getItem<WorkspaceInfo>(Workspace.DB_KEY.workspaceInfo(this.id));
+    }
+
+    /**
+     * Set the last modified time to now. Do not await for this unless strictly required.
+     * @returns the updated metadata as a promise
+     */
+    private async updateLastModified() {
+        return await this.setMetadata({ modifiedAt: new Date() });
+    }
+
+    /**
+     * Updates the metadata of this workspace.
+     * @param info
+     * @returns
+     */
+    private async setMetadata(metadata: Partial<WorkspaceMetadata> = {}) {
+        const oldMetadata = (await this.getMetadata()) ?? {
+            createdAt: new Date(),
+            modifiedAt: new Date(),
+        };
+
+        const parsedMetadata: WorkspaceMetadata = { ...oldMetadata, ...metadata };
+
+        return await localforage.setItem<WorkspaceMetadata>(
+            Workspace.DB_KEY.workspaceMetadata(this.id),
+            parsedMetadata
+        );
+    }
+
+    /**
+     * Returns the info of this workspace.
+     * @returns
+     */
+    public async getMetadata() {
+        return await localforage.getItem<WorkspaceMetadata>(
+            Workspace.DB_KEY.workspaceMetadata(this.id)
+        );
     }
 }
 
