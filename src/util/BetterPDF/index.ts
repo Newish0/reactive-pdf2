@@ -115,7 +115,7 @@ export default class BetterPDF {
 
     /**
      * Returns the specified page as an image.
-     * @param pageNumber The target page
+     * @param pageNumber The target page in ones index
      * @param scale The resolution/scale of the image
      * @param type The desired format of the return image
      * @returns Base64 URI of the image

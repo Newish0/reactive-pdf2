@@ -20,6 +20,7 @@ type WorkspaceInfo = {
 type WorkspaceMetadata = {
     createdAt: Date;
     modifiedAt: Date;
+    thumbnails: [`data:image/webp;base64,${string}`] | null;
 };
 
 /**
@@ -272,6 +273,9 @@ export default class Workspace {
             minItems
         );
 
+        // Generate new thumbnails
+        const thumbnails = await this.updateThumbnails(items);
+        await this.setMetadata({ thumbnails });
         this.updateLastModified();
 
         // Cleanup
@@ -304,6 +308,25 @@ export default class Workspace {
     }
 
     /**
+     * Generate thumbnails based on provided items
+     * @param items
+     */
+    private async updateThumbnails(items: ExtendedDNDItem[]) {
+        const samplePagesThumbs = (
+            await Promise.all(
+                items.slice(0, 3).map((item) => {
+                    return item.page.reference.betterPdf.pageToImage(
+                        item.page.reference.page,
+                        0.25,
+                        "image/webp"
+                    );
+                })
+            )
+        ).filter((img) => img) as [`data:image/webp;base64,${string}`];
+        return samplePagesThumbs;
+    }
+
+    /**
      * Set the last modified time to now. Do not await for this unless strictly required.
      * @returns the updated metadata as a promise
      */
@@ -320,6 +343,7 @@ export default class Workspace {
         const oldMetadata = (await this.getMetadata()) ?? {
             createdAt: new Date(),
             modifiedAt: new Date(),
+            thumbnails: null,
         };
 
         const parsedMetadata: WorkspaceMetadata = { ...oldMetadata, ...metadata };
