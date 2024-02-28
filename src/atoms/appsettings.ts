@@ -23,7 +23,7 @@ const getInitialAppSettings = () => {
         : {
               // Default settings go here
               theme: "night",
-              preferAnimation: false,
+              preferAnimation: true,
               gridScale: {
                   min: GRID_MIN,
                   max: GRID_MAX,
