@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-const GH_PAGE_BASE = "https://newish0.github.io/reactive-pdf2";
+const GH_PAGE_BASE = "https://hy1.dev/reactive-pdf2";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
